@@ -1,6 +1,5 @@
 import urllib.request
 from bs4 import BeautifulSoup
-import time
 #This is the connection to our content database AWS Relational database service
 #try:
 #    conn = pymysql.connect(host='utaechonews.coflj2xb1eul.us-east-1.rds.amazonaws.com', port=3306, user='kash_if47', passwd='HelloEcho2017', db='NewsDb')
@@ -8,9 +7,6 @@ import time
 #    print ("Error")
 #
 #cur = conn.cursor()
-
-#Hard coded headlines just to test functionality
-
 
 # Get WebPage
 site_base = 'http://www.theshorthorn.com'
@@ -45,7 +41,7 @@ for link in links:
     #print(temp)
     else:
         breaker = breaker - 1
-    if(breaker == 10):
+    if breaker == 10:
         break
     else:
         breaker = breaker + 1
@@ -68,22 +64,20 @@ for link in full_links:
         tempstring = tempstring + ' ' + item.get_text(strip=True)
     
     contents.append(tempstring)
-    if(breaker == 10):
+    if breaker == 10:
         break
     else:
         breaker = breaker + 1
 
 # Combine into 2D list
 article = [headlines, contents]
-#print(article)
-headlines2 = ''
-for j in range(0, len(article[0])):
-    if(j != 0):
-        headlines2 = headlines2 + ' . . ' + article[0][j]
-    else:
-        headlines2 = headlines2 + article[0][j]
 
-headlines = 'Pride Week to provide visibility, opportunities to community . . National Night Out to unite police, community . . Volleyball splits weekend in South Carolina . . U.T.A seeks new hires after freeze lifted . . McNair Scholars Program to accept new undergraduates . . Cross-country makes strides at 29th Annual Chile Pepper Festival . . Womens golf finishes 11th in third tournament.'
+temp_string = ''
+for j in range(0, len(article[0])):
+    if j != 0:
+        temp_string = temp_string + ' . . ' + article[0][j]
+    else:
+        temp_string = temp_string + article[0][j]
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
 def lambda_handler(event, context):
@@ -114,7 +108,7 @@ def lambda_handler(event, context):
             'response': {
                 'outputSpeech': {
                     'type': 'PlainText',
-                    'text': headlines2,
+                    'text': temp_string,
                     }
                         }
                         }
