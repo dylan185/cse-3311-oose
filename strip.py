@@ -1,5 +1,16 @@
 import urllib.request
 from bs4 import BeautifulSoup
+import time
+#This is the connection to our content database AWS Relational database service
+#try:
+#    conn = pymysql.connect(host='utaechonews.coflj2xb1eul.us-east-1.rds.amazonaws.com', port=3306, user='kash_if47', passwd='HelloEcho2017', db='NewsDb')
+#except:
+#    print ("Error")
+#
+#cur = conn.cursor()
+
+#Hard coded headlines just to test functionality
+
 
 # Get WebPage
 site_base = 'http://www.theshorthorn.com'
@@ -25,27 +36,89 @@ contents = []
 full_links = []
 VALID_TAGS = ['p']
 
+breaker = 1
 # Piece together links
 for link in links:
     temp = site_base + link
-    full_links.append(temp)
+    if temp[:-9] not in full_links:
+        full_links.append(temp)
+    #print(temp)
+    else:
+        breaker = breaker - 1
+    if(breaker == 10):
+        break
+    else:
+        breaker = breaker + 1
+
+breaker = 1
 
 # Goes to each link and gets headline and content
+
 for link in full_links:
     page = urllib.request.urlopen(link)
     soup = BeautifulSoup(page, 'html.parser')
     headline = soup.find('h1', attrs={'class': 'headline'})
     headlines.append(headline.text.strip())
-
+    
     paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
     p = paragraphs.find_all('p')
     tempstring = ''
-
+    
     for item in p:
         tempstring = tempstring + ' ' + item.get_text(strip=True)
-
+    
     contents.append(tempstring)
+    if(breaker == 10):
+        break
+    else:
+        breaker = breaker + 1
 
 # Combine into 2D list
 article = [headlines, contents]
-print(article)
+#print(article)
+headlines2 = ''
+for j in range(0, len(article[0])):
+    if(j != 0):
+        headlines2 = headlines2 + ' . . ' + article[0][j]
+    else:
+        headlines2 = headlines2 + article[0][j]
+
+headlines = 'Pride Week to provide visibility, opportunities to community . . National Night Out to unite police, community . . Volleyball splits weekend in South Carolina . . U.T.A seeks new hires after freeze lifted . . McNair Scholars Program to accept new undergraduates . . Cross-country makes strides at 29th Annual Chile Pepper Festival . . Womens golf finishes 11th in third tournament.'
+
+#This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
+def lambda_handler(event, context):
+    # This is to check to make sure our app is the only skill that can access this lambda function
+    # if (event['session']['application']['applicationId'] !=
+    #         "amzn1.echo-sdk-ams.app.[unique-value-here]"):
+    #     raise ValueError("Invalid Application ID")
+    #Thus is where we return a response in JASON format to the Alexa skill speach output.
+    
+    #intentName=event["request"]["intent"]["name"]
+    if event["request"]["type"] == 'LaunchRequest':
+        welcome_message = 'Welcome to U.T.A Short horn news!'
+        response_1 = {
+        'version': '1.0',
+        'response': {
+            'outputSpeech': {
+                'type': 'PlainText',
+                'text': welcome_message,
+            }
+        }
+        }
+        return response_1
+    elif event["request"]["type"] == 'IntentRequest':
+        intentName=event["request"]["intent"]["name"]
+        if intentName == 'ReadHeadlinesIntent':
+            response_2 =    {
+            'version': '1.0',
+            'response': {
+                'outputSpeech': {
+                    'type': 'PlainText',
+                    'text': headlines2,
+                    }
+                        }
+                        }
+            return response_2
+
+#returning the response JASON structure
+#return response
