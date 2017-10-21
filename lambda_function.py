@@ -111,8 +111,8 @@ if (articleDate != currentDate) and (currentHour > 9):
     file.write('\n')
     j = 0
     for j in range(0, len(article[1])):
-        file.write('\n~~')
         file.write(article[1][j])
+        file.write('\n')
 
     file.close()
 
