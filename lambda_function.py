@@ -9,16 +9,13 @@ from bs4 import BeautifulSoup
 #    print ("Error")
 #
 #cur = conn.cursor()
-articleDate = '2017-10-21'
 temp_string = ''
 contents = []
 
 file = open("handler.txt", "r")
 data = file.readlines()
-articleDate = data[0]
+articleDate = data[0][:10]
 
-
-articleDate = '2017-10-21'
 now = datetime.datetime.now()
 currentDate = str(now)[:10]
 currentHour = now.hour
@@ -102,8 +99,8 @@ if (articleDate != currentDate) and (currentHour > 9):
     file.write('\n')
     j = 0
     for j in range(0, len(article[1])):
-        file.write('\n~~')
         file.write(article[1][j])
+        file.write('\n')
 
     file.close()
 else:
