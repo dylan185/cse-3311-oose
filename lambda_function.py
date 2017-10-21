@@ -86,7 +86,6 @@ def lambda_handler(event, context):
     #         "amzn1.echo-sdk-ams.app.[unique-value-here]"):
     #     raise ValueError("Invalid Application ID")
     #Thus is where we return a response in JASON format to the Alexa skill speach output.
-    
     #intentName=event["request"]["intent"]["name"]
     if event["request"]["type"] == 'LaunchRequest':
         welcome_message = 'Welcome to U.T.A Short horn news!'
