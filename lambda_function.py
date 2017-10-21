@@ -10,25 +10,30 @@ from bs4 import BeautifulSoup
 #
 #cur = conn.cursor()
 articleDate = '2017-10-21'
+temp_string = ''
+contents = []
 
 i = 1
-j = 1
-with open("holder.txt","r") as holder_file:
-    for i, line in holder_file:
+j = 0
+with open("handler.txt","r") as handler_file:
+    for line in enumerate(handler_file):
         if i == 1:
             articleDate = line
-        else if i == 2:
+            print(articleDate)
+        elif i == 2:
             temp_string = line
+            print(temp_string)
         else:
-            
+            contents.append(line)
+        i+=1
+print(contents)
 
 now = datetime.datetime.now()
 currentDate = str(now)[:10]
 currentHour = now.hour
-temp_string = ''
 
 if (articleDate != currentDate) and (currentHour > 9):
-    os.remove("handler.txt")
+    #os.remove("handler.txt")
     # Get WebPage
     site_base = 'http://www.theshorthorn.com'
     quote_page = 'http://www.theshorthorn.com/news/campus/'
@@ -49,7 +54,6 @@ if (articleDate != currentDate) and (currentHour > 9):
     # Declare whitelist, i &lists
     i = 0
     headlines = []
-    contents = []
     full_links = []
     VALID_TAGS = ['p']
 
@@ -111,7 +115,6 @@ if (articleDate != currentDate) and (currentHour > 9):
         file.write(article[1][j])
 
     file.close()
-else:
 
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
