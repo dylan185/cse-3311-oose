@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 #
 #cur = conn.cursor()
 
+
 articleDate = '2017-10-21'
 now = datetime.datetime.now()
 currentDate = str(now)[:10]
