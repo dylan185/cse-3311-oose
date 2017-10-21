@@ -8,9 +8,19 @@ from bs4 import BeautifulSoup
 #    print ("Error")
 #
 #cur = conn.cursor()
-
-
 articleDate = '2017-10-21'
+
+i = 1
+j = 1
+with open("holder.txt","r") as holder_file:
+    for i, line in holder_file:
+        if i == 1:
+            articleDate = line
+        else if i == 2:
+            temp_string = line
+        else:
+            
+
 now = datetime.datetime.now()
 currentDate = str(now)[:10]
 currentHour = now.hour
