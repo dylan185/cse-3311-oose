@@ -22,7 +22,7 @@ currentDate = str(now)[:10]
 currentHour = now.hour
 
 if (articleDate != currentDate) and (currentHour > 9):
-    #os.remove("handler.txt")
+    os.remove("handler.txt")
     # Get WebPage
     site_base = 'http://www.theshorthorn.com'
     quote_page = 'http://www.theshorthorn.com/news/campus/'
