@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 temp_string = ''
 contents = []
 
-file = open("handler.txt", "r")
+file = open("tmp/handler.txt", "r")
 data = file.readlines()
 articleDate = data[0][:10]
 
@@ -21,7 +21,7 @@ currentDate = str(now)[:10]
 currentHour = now.hour
 
 if (articleDate != currentDate) and (currentHour > 9):
-    os.remove("handler.txt")
+    os.remove("tmp/handler.txt")
     # Get WebPage
     site_base = 'http://www.theshorthorn.com'
     quote_page = 'http://www.theshorthorn.com/news/campus/'
@@ -92,7 +92,7 @@ if (articleDate != currentDate) and (currentHour > 9):
         else:
             temp_string = temp_string + article[0][j]
 
-    file = open('handler.txt','w')
+    file = open('tmp/handler.txt','w')
     file.write(currentDate)
     file.write('\n')
     file.write(temp_string)
