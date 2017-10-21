@@ -1,4 +1,5 @@
 import urllib.request
+import os
 import datetime
 from bs4 import BeautifulSoup
 #This is the connection to our content database AWS Relational database service
@@ -24,10 +25,10 @@ with open("holder.txt","r") as holder_file:
 now = datetime.datetime.now()
 currentDate = str(now)[:10]
 currentHour = now.hour
+temp_string = ''
 
 if (articleDate != currentDate) and (currentHour > 9):
-    print('Fetch articles from URL')
-
+    os.remove("handler.txt")
     # Get WebPage
     site_base = 'http://www.theshorthorn.com'
     quote_page = 'http://www.theshorthorn.com/news/campus/'
@@ -92,12 +93,26 @@ if (articleDate != currentDate) and (currentHour > 9):
     # Combine into 2D list
     article = [headlines, contents]
 
-    temp_string = ''
+
     for j in range(0, len(article[0])):
         if j != 0:
             temp_string = temp_string + ' . . ' + article[0][j]
         else:
             temp_string = temp_string + article[0][j]
+
+    file = open('handler.txt','w')
+    file.write(currentDate)
+    file.write('\n')
+    file.write(temp_string)
+    file.write('\n')
+    j = 0
+    for j in range(0, len(article[1])):
+        file.write('\n~~')
+        file.write(article[1][j])
+
+    file.close()
+else:
+
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
 def lambda_handler(event, context):
