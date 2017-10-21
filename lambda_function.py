@@ -1,4 +1,5 @@
 import urllib.request
+import datetime
 from bs4 import BeautifulSoup
 #This is the connection to our content database AWS Relational database service
 #try:
@@ -8,76 +9,84 @@ from bs4 import BeautifulSoup
 #
 #cur = conn.cursor()
 
-# Get WebPage
-site_base = 'http://www.theshorthorn.com'
-quote_page = 'http://www.theshorthorn.com/news/campus/'
+articleDate = '2017-10-21'
+now = datetime.datetime.now()
+currentDate = str(now)[:10]
+currentHour = now.hour
 
-# Parse WebPage
-page = urllib.request.urlopen(quote_page)
-soup = BeautifulSoup(page, 'html.parser')
+if (articleDate != currentDate) and (currentHour > 9):
+    print('Fetch articles from URL')
 
-# Find Top Articles from Page
-top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
+    # Get WebPage
+    site_base = 'http://www.theshorthorn.com'
+    quote_page = 'http://www.theshorthorn.com/news/campus/'
 
-# Get href links to articles and store in a list
-links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
-
-# Deletes the comment links for each article (every odd position)
-del links[1::2]
-
-# Declare whitelist, i &lists
-i = 0
-headlines = []
-contents = []
-full_links = []
-VALID_TAGS = ['p']
-
-breaker = 1
-# Piece together links
-for link in links:
-    temp = site_base + link
-    if temp[:-9] not in full_links:
-        full_links.append(temp)
-    #print(temp)
-    else:
-        breaker = breaker - 1
-    if breaker == 10:
-        break
-    else:
-        breaker = breaker + 1
-
-breaker = 1
-
-# Goes to each link and gets headline and content
-
-for link in full_links:
-    page = urllib.request.urlopen(link)
+    # Parse WebPage
+    page = urllib.request.urlopen(quote_page)
     soup = BeautifulSoup(page, 'html.parser')
-    headline = soup.find('h1', attrs={'class': 'headline'})
-    headlines.append(headline.text.strip())
-    
-    paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
-    p = paragraphs.find_all('p')
-    tempstring = ''
-    
-    for item in p:
-        tempstring = tempstring + ' ' + item.get_text(strip=True)
-    
-    contents.append(tempstring)
-    if breaker == 10:
-        break
-    else:
-        breaker = breaker + 1
 
-# Combine into 2D list
-article = [headlines, contents]
+    # Find Top Articles from Page
+    top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
 
-temp_string = ''
-for j in range(0, len(article[0])):
-    if j != 0:
-        temp_string = temp_string + ' . . ' + article[0][j]
-    else:
-        temp_string = temp_string + article[0][j]
+    # Get href links to articles and store in a list
+    links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
+
+    # Deletes the comment links for each article (every odd position)
+    del links[1::2]
+
+    # Declare whitelist, i &lists
+    i = 0
+    headlines = []
+    contents = []
+    full_links = []
+    VALID_TAGS = ['p']
+
+    breaker = 1
+    # Piece together links
+    for link in links:
+        temp = site_base + link
+        if temp[:-9] not in full_links:
+            full_links.append(temp)
+        #print(temp)
+        else:
+            breaker = breaker - 1
+        if breaker == 10:
+            break
+        else:
+            breaker = breaker + 1
+
+    breaker = 1
+
+    # Goes to each link and gets headline and content
+
+    for link in full_links:
+        page = urllib.request.urlopen(link)
+        soup = BeautifulSoup(page, 'html.parser')
+        headline = soup.find('h1', attrs={'class': 'headline'})
+        headlines.append(headline.text.strip())
+        
+        paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
+        p = paragraphs.find_all('p')
+        tempstring = ''
+        
+        for item in p:
+            tempstring = tempstring + ' ' + item.get_text(strip=True)
+        
+        contents.append(tempstring)
+        if breaker == 10:
+            break
+        else:
+            breaker = breaker + 1
+
+    # Combine into 2D list
+    article = [headlines, contents]
+
+    temp_string = ''
+    for j in range(0, len(article[0])):
+        if j != 0:
+            temp_string = temp_string + ' . . ' + article[0][j]
+        else:
+            temp_string = temp_string + article[0][j]
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
 def lambda_handler(event, context):
