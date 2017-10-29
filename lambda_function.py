@@ -27,7 +27,7 @@ try:
         os.remove("/tmp/handler.txt")
         # Get WebPage
         site_base = 'http://www.theshorthorn.com'
-        quote_page = 'http://www.theshorthorn.com/news/campus/'
+        quote_page = 'http://www.theshorthorn.com/news/'
 
         # Parse WebPage
         page = urllib.request.urlopen(quote_page)
