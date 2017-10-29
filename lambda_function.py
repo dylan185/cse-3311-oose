@@ -203,9 +203,6 @@ for m in range(0, len(contents)):
     for k in range(0, len(blacklist)):
         contents[m] = re.sub(blacklist[k][0], blacklist[k][1], contents[m], flags=re.IGNORECASE)
 
-print(temp_string)
-print(contents)
-
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
 def lambda_handler(event, context):
     # This is to check to make sure our app is the only skill that can access this lambda function
