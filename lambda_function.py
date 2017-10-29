@@ -1,6 +1,7 @@
 import urllib.request
 import os
 import datetime
+import re
 from bs4 import BeautifulSoup
 #This is the connection to our content database AWS Relational database service
 #try:
@@ -191,6 +192,20 @@ except:
         file.write('\n')
 
 file.close()
+
+blacklist = [['UTA', ' U.T.A '], [' @', ' Author '], ['.edu', ' dot e.d.u'], ['\xa0', ' ']]
+m = 0
+for m in range(0, len(blacklist)):
+    temp_string = re.sub(blacklist[m][0], blacklist[m][1], temp_string, flags=re.IGNORECASE)
+m = 0
+for m in range(0, len(contents)):
+    k = 0
+    for k in range(0, len(blacklist)):
+        contents[m] = re.sub(blacklist[k][0], blacklist[k][1], contents[m], flags=re.IGNORECASE)
+
+print(temp_string)
+print(contents)
+
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
 def lambda_handler(event, context):
     # This is to check to make sure our app is the only skill that can access this lambda function
