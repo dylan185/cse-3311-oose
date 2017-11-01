@@ -113,7 +113,7 @@ try:
         temp_string = data[1]
 except:
     site_base = 'http://www.theshorthorn.com'
-    quote_page = 'http://www.theshorthorn.com/news/campus/'
+    quote_page = 'http://www.theshorthorn.com/news/'
     
     # Parse WebPage
     page = urllib.request.urlopen(quote_page)
