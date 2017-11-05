@@ -135,15 +135,31 @@ def lambda_handler(event, context):
     elif event["request"]["type"] == 'IntentRequest':
         intentName=event["request"]["intent"]["name"]
         if intentName == 'ReadHeadlinesIntent':
+            GT = get_article("news")
+            headlines_out = GT[0]
             response_2 =    {
             'version': '1.0',
             'response': {
                 'outputSpeech': {
                     'type': 'PlainText',
-                    'text': temp_string,
+                    'text': headlines_out,
                     }
                         }
                         }
+            return response_2
+        elif intentName == 'ReadGenreHeadlines':
+            Genre = event["request"]["intent"]["slots"]["Gen"]["value"]
+            GT = get_article(Genre)
+            headlines_out = GT[0]
+            response_2 =    {
+                'version': '1.0',
+                    'response': {
+                        'outputSpeech': {
+                            'type': 'PlainText',
+                                'text': headlines_out,
+                                }
+                                    }
+                                }
             return response_2
 
 #returning the response JASON structure
