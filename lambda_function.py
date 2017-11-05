@@ -58,7 +58,7 @@ def get_article(genre):
         #print(temp)
         else:
             breaker = breaker - 1
-        if breaker == 10:
+        if breaker == 6:
             break
         else:
             breaker = breaker + 1
@@ -81,7 +81,7 @@ def get_article(genre):
             tempstring = tempstring + ' ' + item.get_text(strip=True)
         
         contents.append(tempstring)
-        if breaker == 10:
+        if breaker == 6:
             break
         else:
             breaker = breaker + 1
