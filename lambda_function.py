@@ -4,379 +4,113 @@ import datetime
 import re
 from bs4 import BeautifulSoup
 
-temp_string = ''
-contents = []
-now = datetime.datetime.now()
-currentDate = str(now)[:10]
-currentHour = now.hour
-
-#try:
-#    file = open("/tmp/handler.txt", "r")
-#    data = file.readlines()
-#    articleDate = data[0][:10]
-#    file_check = True
-#
-#
-#    if (articleDate != currentDate) and (currentHour > 9):
-#        os.remove("/tmp/handler.txt")
-#        # Get WebPage
-#        site_base = 'http://www.theshorthorn.com'
-#        quote_page = 'http://www.theshorthorn.com/news/'
-#
-#        # Parse WebPage
-#        page = urllib.request.urlopen(quote_page)
-#        soup = BeautifulSoup(page, 'html.parser')
-#
-#        # Find Top Articles from Page
-#        top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
-#
-#        # Get href links to articles and store in a list
-#        links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
-#
-#        # Deletes the comment links for each article (every odd position)
-#        del links[1::2]
-#
-#        # Declare whitelist, i &lists
-#        i = 0
-#        headlines = []
-#        full_links = []
-#        VALID_TAGS = ['p']
-#
-#        breaker = 1
-#        # Piece together links
-#        for link in links:
-#            temp = site_base + link
-#            if temp[:-9] not in full_links:
-#                full_links.append(temp)
-#            #print(temp)
-#            else:
-#                breaker = breaker - 1
-#            if breaker == 10:
-#                break
-#            else:
-#                breaker = breaker + 1
-#
-#        breaker = 1
-#
-#        # Goes to each link and gets headline and content
-#
-#        for link in full_links:
-#            page = urllib.request.urlopen(link)
-#            soup = BeautifulSoup(page, 'html.parser')
-#            headline = soup.find('h1', attrs={'class': 'headline'})
-#            headlines.append(headline.text.strip())
-#
-#            paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
-#            p = paragraphs.find_all('p')
-#            tempstring = ''
-#
-#            for item in p:
-#                tempstring = tempstring + ' ' + item.get_text(strip=True)
-#
-#            contents.append(tempstring)
-#            if breaker == 10:
-#                break
-#            else:
-#                breaker = breaker + 1
-#
-#        # Combine into 2D list
-#        article = [headlines, contents]
-#
-#
-#        for j in range(0, len(article[0])):
-#            if j != 0:
-#                temp_string = temp_string + '<break time="700ms"/>' + article[0][j]
-#            else:
-#                temp_string = temp_string + article[0][j]
-#
-#        file = open('/tmp/handler.txt','w+')
-#        file.write(currentDate)
-#        file.write('\n')
-#        file.write(temp_string)
-#        file.write('\n')
-#        j = 0
-#        for j in range(0, len(article[1])):
-#            file.write(article[1][j])
-#            file.write('\n')
-#
-#        file.close()
-#    else:
-#        i = 0
-#        for i in range(0, 10):
-#            contents.append(data[i+2])
-#        temp_string = data[1]
-#except:
-
-
-# --- Begin Default News ---
-quote_page = 'http://www.theshorthorn.com/news/'
-
-# Parse WebPage
-page = urllib.request.urlopen(quote_page)
-soup = BeautifulSoup(page, 'html.parser')
-
-# Find Top Articles from Page
-top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
-
-# Get href links to articles and store in a list
-links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
-
-# Deletes the comment links for each article (every odd position)
-del links[1::2]
-
-# Declare whitelist, i &lists
-i = 0
-headlines = []
-full_links = []
-VALID_TAGS = ['p']
-
-breaker = 1
-# Piece together links
-for link in links:
-    temp = site_base + link
-    if temp[:-9] not in full_links:
-        full_links.append(temp)
-    #print(temp)
+def get_page(the_string):
+    # This function gets the correct webpage depending on the string sent
+    quote_page = ''
+    if the_string == 'sports':
+        quote_page = 'http://www.theshorthorn.com/sports/'
+    elif the_string == 'life entertainment':
+        quote_page = 'http://www.theshorthorn.com/life_and_entertainment/'
+    elif the_string == 'opinion':
+        quote_page = 'http://www.theshorthorn.com/opinion/'
     else:
-        breaker = breaker - 1
-    if breaker == 10:
-        break
-    else:
-        breaker = breaker + 1
+        quote_page = 'http://www.theshorthorn.com/news/'
 
-breaker = 1
+    return quote_page
 
-# Goes to each link and gets headline and content
+def get_article():
+    temp_string = ''
+    contents = []
+    now = datetime.datetime.now()
+    currentDate = str(now)[:10]
+    currentHour = now.hour
 
-for link in full_links:
-    page = urllib.request.urlopen(link)
+    # Set webpage to specified want
+    site_base = 'http://www.theshorthorn.com'
+
+    quote_page = get_page('news')
+    print(quote_page)
+
+    # Parse WebPage
+    page = urllib.request.urlopen(quote_page)
     soup = BeautifulSoup(page, 'html.parser')
-    headline = soup.find('h1', attrs={'class': 'headline'})
-    headlines.append(headline.text.strip())
-    
-    paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
-    p = paragraphs.find_all('p')
-    tempstring = ''
-    
-    for item in p:
-        tempstring = tempstring + ' ' + item.get_text(strip=True)
-    
-    contents.append(tempstring)
-    if breaker == 10:
-        break
-    else:
-        breaker = breaker + 1
 
-# Combine into 2D list
-article = [headlines, contents]
-# --- End Default News ---
+    # Find Top Articles from Page
+    top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
 
-# --- Begin Sports ---
-quote_page = 'http://www.theshorthorn.com/sports/'
+    # Get href links to articles and store in a list
+    links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
 
-# Parse WebPage
-page = urllib.request.urlopen(quote_page)
-soup = BeautifulSoup(page, 'html.parser')
+    # Deletes the comment links for each article (every odd position)
+    del links[1::2]
 
-# Find Top Articles from Page
-top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
+    # Declare whitelist, i &lists
+    i = 0
+    headlines = []
+    full_links = []
+    VALID_TAGS = ['p']
 
-# Get href links to articles and store in a list
-links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
+    breaker = 1
+    # Piece together links
+    for link in links:
+        temp = site_base + link
+        if temp[:-9] not in full_links:
+            full_links.append(temp)
+        #print(temp)
+        else:
+            breaker = breaker - 1
+        if breaker == 10:
+            break
+        else:
+            breaker = breaker + 1
 
-# Deletes the comment links for each article (every odd position)
-del links[1::2]
+    breaker = 1
 
-# Declare whitelist, i &lists
-i = 0
-headlines = []
-full_links = []
-VALID_TAGS = ['p']
+    # Goes to each link and gets headline and content
 
-breaker = 1
-# Piece together links
-for link in links:
-    temp = site_base + link
-    if temp[:-9] not in full_links:
-        full_links.append(temp)
-    #print(temp)
-    else:
-        breaker = breaker - 1
-    if breaker == 10:
-        break
-    else:
-        breaker = breaker + 1
+    for link in full_links:
+        page = urllib.request.urlopen(link)
+        soup = BeautifulSoup(page, 'html.parser')
+        headline = soup.find('h1', attrs={'class': 'headline'})
+        headlines.append(headline.text.strip())
+        
+        paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
+        p = paragraphs.find_all('p')
+        tempstring = ''
+        
+        for item in p:
+            tempstring = tempstring + ' ' + item.get_text(strip=True)
+        
+        contents.append(tempstring)
+        if breaker == 10:
+            break
+        else:
+            breaker = breaker + 1
 
-breaker = 1
+    # Combine into 2D list
+    article = [headlines, contents]
 
-# Goes to each link and gets headline and content
+    # Adds in the command for alexa to pause inbetween article headlines
+    for j in range(0, len(article[0])):
+        if j != 0:
+            temp_string = temp_string + '<break time="700ms"/>' + article[0][j]
+        else:
+            temp_string = temp_string + article[0][j]
 
-for link in full_links:
-    page = urllib.request.urlopen(link)
-    soup = BeautifulSoup(page, 'html.parser')
-    headline = soup.find('h1', attrs={'class': 'headline'})
-    headlines.append(headline.text.strip())
-    
-    paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
-    p = paragraphs.find_all('p')
-    tempstring = ''
-    
-    for item in p:
-        tempstring = tempstring + ' ' + item.get_text(strip=True)
-    
-    contents.append(tempstring)
-    if breaker == 10:
-        break
-    else:
-        breaker = breaker + 1
+    # Start checking the content and headlines for blacklisted words
+    blacklist = [['news-editor.shorthorn@uta.edu', 'news-editor dot shorthorn at U.T.A dot E.D.U'], [' @', ' Author '], ['uta.edu', ' U.T.A dot e.d.u'], ['\xa0', ' '], ['UTA', ' U.T.A '], ['10-20-30', 'ten-twenty-thirty']]
+    m = 0
+    for m in range(0, len(blacklist)):
+        temp_string = re.sub(blacklist[m][0], blacklist[m][1], temp_string, flags=re.IGNORECASE)
+    m = 0
+    for m in range(0, len(contents)):
+        k = 0
+        for k in range(0, len(blacklist)):
+            contents[m] = re.sub(blacklist[k][0], blacklist[k][1], contents[m], flags=re.IGNORECASE)
 
-# Combine into 2D list
-article = [headlines, contents]
-# --- End Sports ---
-
-# --- Begin Life Entertainment ---
-quote_page = 'http://www.theshorthorn.com/life_and_entertainment/'
-
-# Parse WebPage
-page = urllib.request.urlopen(quote_page)
-soup = BeautifulSoup(page, 'html.parser')
-
-# Find Top Articles from Page
-top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
-
-# Get href links to articles and store in a list
-links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
-
-# Deletes the comment links for each article (every odd position)
-del links[1::2]
-
-# Declare whitelist, i &lists
-i = 0
-headlines = []
-full_links = []
-VALID_TAGS = ['p']
-
-breaker = 1
-# Piece together links
-for link in links:
-    temp = site_base + link
-    if temp[:-9] not in full_links:
-        full_links.append(temp)
-    #print(temp)
-    else:
-        breaker = breaker - 1
-    if breaker == 10:
-        break
-    else:
-        breaker = breaker + 1
-
-breaker = 1
-
-# Goes to each link and gets headline and content
-
-for link in full_links:
-    page = urllib.request.urlopen(link)
-    soup = BeautifulSoup(page, 'html.parser')
-    headline = soup.find('h1', attrs={'class': 'headline'})
-    headlines.append(headline.text.strip())
-    
-    paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
-    p = paragraphs.find_all('p')
-    tempstring = ''
-    
-    for item in p:
-        tempstring = tempstring + ' ' + item.get_text(strip=True)
-    
-    contents.append(tempstring)
-    if breaker == 10:
-        break
-    else:
-        breaker = breaker + 1
-
-# Combine into 2D list
-article = [headlines, contents]
-# --- End Life Entertainment ---
-
-# --- Begin Opinion ---
-quote_page = 'http://www.theshorthorn.com/opinion/'
-
-# Parse WebPage
-page = urllib.request.urlopen(quote_page)
-soup = BeautifulSoup(page, 'html.parser')
-
-# Find Top Articles from Page
-top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
-
-# Get href links to articles and store in a list
-links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
-
-# Deletes the comment links for each article (every odd position)
-del links[1::2]
-
-# Declare whitelist, i &lists
-i = 0
-headlines = []
-full_links = []
-VALID_TAGS = ['p']
-
-breaker = 1
-# Piece together links
-for link in links:
-    temp = site_base + link
-    if temp[:-9] not in full_links:
-        full_links.append(temp)
-    #print(temp)
-    else:
-        breaker = breaker - 1
-    if breaker == 10:
-        break
-    else:
-        breaker = breaker + 1
-
-breaker = 1
-
-# Goes to each link and gets headline and content
-
-for link in full_links:
-    page = urllib.request.urlopen(link)
-    soup = BeautifulSoup(page, 'html.parser')
-    headline = soup.find('h1', attrs={'class': 'headline'})
-    headlines.append(headline.text.strip())
-    
-    paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
-    p = paragraphs.find_all('p')
-    tempstring = ''
-    
-    for item in p:
-        tempstring = tempstring + ' ' + item.get_text(strip=True)
-    
-    contents.append(tempstring)
-    if breaker == 10:
-        break
-    else:
-        breaker = breaker + 1
-
-# Combine into 2D list
-article = [headlines, contents]
-# --- End Opinion ---
-
-
-for j in range(0, len(article[0])):
-    if j != 0:
-        temp_string = temp_string + '<break time="700ms"/>' + article[0][j]
-    else:
-        temp_string = temp_string + article[0][j]
-
-# Start checking the content and headlines for blacklisted words
-blacklist = [['news-editor.shorthorn@uta.edu', 'news-editor dot shorthorn at U.T.A dot E.D.U'], [' @', ' Author '], ['uta.edu', ' U.T.A dot e.d.u'], ['\xa0', ' '], ['UTA', ' U.T.A '], ['10-20-30', 'ten-twenty-thirty']]
-m = 0
-for m in range(0, len(blacklist)):
-    temp_string = re.sub(blacklist[m][0], blacklist[m][1], temp_string, flags=re.IGNORECASE)
-m = 0
-for m in range(0, len(contents)):
-    k = 0
-    for k in range(0, len(blacklist)):
-        contents[m] = re.sub(blacklist[k][0], blacklist[k][1], contents[m], flags=re.IGNORECASE)
+    # Set and return the final article
+    final_article = [temp_string, contents]
+    return final_article
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
 def lambda_handler(event, context):
