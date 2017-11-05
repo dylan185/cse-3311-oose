@@ -3,193 +3,187 @@ import os
 import datetime
 import re
 from bs4 import BeautifulSoup
-#This is the connection to our content database AWS Relational database service
-#try:
-#    conn = pymysql.connect(host='utaechonews.coflj2xb1eul.us-east-1.rds.amazonaws.com', port=3306, user='kash_if47', passwd='HelloEcho2017', db='NewsDb')
-#except:
-#    print ("Error")
-#
-#cur = conn.cursor()
+
 temp_string = ''
 contents = []
 now = datetime.datetime.now()
 currentDate = str(now)[:10]
 currentHour = now.hour
 
-try:
-    file = open("/tmp/handler.txt", "r")
-    data = file.readlines()
-    articleDate = data[0][:10]
-    file_check = True
-    
+#try:
+#    file = open("/tmp/handler.txt", "r")
+#    data = file.readlines()
+#    articleDate = data[0][:10]
+#    file_check = True
+#
+#
+#    if (articleDate != currentDate) and (currentHour > 9):
+#        os.remove("/tmp/handler.txt")
+#        # Get WebPage
+#        site_base = 'http://www.theshorthorn.com'
+#        quote_page = 'http://www.theshorthorn.com/news/'
+#
+#        # Parse WebPage
+#        page = urllib.request.urlopen(quote_page)
+#        soup = BeautifulSoup(page, 'html.parser')
+#
+#        # Find Top Articles from Page
+#        top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
+#
+#        # Get href links to articles and store in a list
+#        links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
+#
+#        # Deletes the comment links for each article (every odd position)
+#        del links[1::2]
+#
+#        # Declare whitelist, i &lists
+#        i = 0
+#        headlines = []
+#        full_links = []
+#        VALID_TAGS = ['p']
+#
+#        breaker = 1
+#        # Piece together links
+#        for link in links:
+#            temp = site_base + link
+#            if temp[:-9] not in full_links:
+#                full_links.append(temp)
+#            #print(temp)
+#            else:
+#                breaker = breaker - 1
+#            if breaker == 10:
+#                break
+#            else:
+#                breaker = breaker + 1
+#
+#        breaker = 1
+#
+#        # Goes to each link and gets headline and content
+#
+#        for link in full_links:
+#            page = urllib.request.urlopen(link)
+#            soup = BeautifulSoup(page, 'html.parser')
+#            headline = soup.find('h1', attrs={'class': 'headline'})
+#            headlines.append(headline.text.strip())
+#
+#            paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
+#            p = paragraphs.find_all('p')
+#            tempstring = ''
+#
+#            for item in p:
+#                tempstring = tempstring + ' ' + item.get_text(strip=True)
+#
+#            contents.append(tempstring)
+#            if breaker == 10:
+#                break
+#            else:
+#                breaker = breaker + 1
+#
+#        # Combine into 2D list
+#        article = [headlines, contents]
+#
+#
+#        for j in range(0, len(article[0])):
+#            if j != 0:
+#                temp_string = temp_string + '<break time="700ms"/>' + article[0][j]
+#            else:
+#                temp_string = temp_string + article[0][j]
+#
+#        file = open('/tmp/handler.txt','w+')
+#        file.write(currentDate)
+#        file.write('\n')
+#        file.write(temp_string)
+#        file.write('\n')
+#        j = 0
+#        for j in range(0, len(article[1])):
+#            file.write(article[1][j])
+#            file.write('\n')
+#
+#        file.close()
+#    else:
+#        i = 0
+#        for i in range(0, 10):
+#            contents.append(data[i+2])
+#        temp_string = data[1]
+#except:
+site_base = 'http://www.theshorthorn.com'
+quote_page = 'http://www.theshorthorn.com/news/'
 
-    if (articleDate != currentDate) and (currentHour > 9):
-        os.remove("/tmp/handler.txt")
-        # Get WebPage
-        site_base = 'http://www.theshorthorn.com'
-        quote_page = 'http://www.theshorthorn.com/news/'
+# Parse WebPage
+page = urllib.request.urlopen(quote_page)
+soup = BeautifulSoup(page, 'html.parser')
 
-        # Parse WebPage
-        page = urllib.request.urlopen(quote_page)
-        soup = BeautifulSoup(page, 'html.parser')
+# Find Top Articles from Page
+top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
 
-        # Find Top Articles from Page
-        top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
+# Get href links to articles and store in a list
+links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
 
-        # Get href links to articles and store in a list
-        links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
+# Deletes the comment links for each article (every odd position)
+del links[1::2]
 
-        # Deletes the comment links for each article (every odd position)
-        del links[1::2]
+# Declare whitelist, i &lists
+i = 0
+headlines = []
+full_links = []
+VALID_TAGS = ['p']
 
-        # Declare whitelist, i &lists
-        i = 0
-        headlines = []
-        full_links = []
-        VALID_TAGS = ['p']
-
-        breaker = 1
-        # Piece together links
-        for link in links:
-            temp = site_base + link
-            if temp[:-9] not in full_links:
-                full_links.append(temp)
-            #print(temp)
-            else:
-                breaker = breaker - 1
-            if breaker == 10:
-                break
-            else:
-                breaker = breaker + 1
-
-        breaker = 1
-
-        # Goes to each link and gets headline and content
-
-        for link in full_links:
-            page = urllib.request.urlopen(link)
-            soup = BeautifulSoup(page, 'html.parser')
-            headline = soup.find('h1', attrs={'class': 'headline'})
-            headlines.append(headline.text.strip())
-            
-            paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
-            p = paragraphs.find_all('p')
-            tempstring = ''
-            
-            for item in p:
-                tempstring = tempstring + ' ' + item.get_text(strip=True)
-            
-            contents.append(tempstring)
-            if breaker == 10:
-                break
-            else:
-                breaker = breaker + 1
-
-        # Combine into 2D list
-        article = [headlines, contents]
-
-
-        for j in range(0, len(article[0])):
-            if j != 0:
-                temp_string = temp_string + ' . . ' + article[0][j]
-            else:
-                temp_string = temp_string + article[0][j]
-
-        file = open('/tmp/handler.txt','w+')
-        file.write(currentDate)
-        file.write('\n')
-        file.write(temp_string)
-        file.write('\n')
-        j = 0
-        for j in range(0, len(article[1])):
-            file.write(article[1][j])
-            file.write('\n')
-
-        file.close()
+breaker = 1
+# Piece together links
+for link in links:
+    temp = site_base + link
+    if temp[:-9] not in full_links:
+        full_links.append(temp)
+    #print(temp)
     else:
-        i = 0
-        for i in range(0, 10):
-            contents.append(data[i+2])
-        temp_string = data[1]
-except:
-    site_base = 'http://www.theshorthorn.com'
-    quote_page = 'http://www.theshorthorn.com/news/'
-    
-    # Parse WebPage
-    page = urllib.request.urlopen(quote_page)
+        breaker = breaker - 1
+    if breaker == 10:
+        break
+    else:
+        breaker = breaker + 1
+
+breaker = 1
+
+# Goes to each link and gets headline and content
+
+for link in full_links:
+    page = urllib.request.urlopen(link)
     soup = BeautifulSoup(page, 'html.parser')
+    headline = soup.find('h1', attrs={'class': 'headline'})
+    headlines.append(headline.text.strip())
     
-    # Find Top Articles from Page
-    top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
+    paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
+    p = paragraphs.find_all('p')
+    tempstring = ''
     
-    # Get href links to articles and store in a list
-    links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
+    for item in p:
+        tempstring = tempstring + ' ' + item.get_text(strip=True)
     
-    # Deletes the comment links for each article (every odd position)
-    del links[1::2]
-    
-    # Declare whitelist, i &lists
-    i = 0
-    headlines = []
-    full_links = []
-    VALID_TAGS = ['p']
-    
-    breaker = 1
-    # Piece together links
-    for link in links:
-        temp = site_base + link
-        if temp[:-9] not in full_links:
-            full_links.append(temp)
-        #print(temp)
-        else:
-            breaker = breaker - 1
-        if breaker == 10:
-            break
-        else:
-            breaker = breaker + 1
+    contents.append(tempstring)
+    if breaker == 10:
+        break
+    else:
+        breaker = breaker + 1
 
-    breaker = 1
-    
-    # Goes to each link and gets headline and content
-    
-    for link in full_links:
-        page = urllib.request.urlopen(link)
-        soup = BeautifulSoup(page, 'html.parser')
-        headline = soup.find('h1', attrs={'class': 'headline'})
-        headlines.append(headline.text.strip())
-        
-        paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
-        p = paragraphs.find_all('p')
-        tempstring = ''
-        
-        for item in p:
-            tempstring = tempstring + ' ' + item.get_text(strip=True)
-        
-        contents.append(tempstring)
-        if breaker == 10:
-            break
-        else:
-            breaker = breaker + 1
-    
-    # Combine into 2D list
-    article = [headlines, contents]
+# Combine into 2D list
+article = [headlines, contents]
 
 
-    for j in range(0, len(article[0])):
-        if j != 0:
-            temp_string = temp_string + ' . . ' + article[0][j]
-        else:
-            temp_string = temp_string + article[0][j]
+for j in range(0, len(article[0])):
+    if j != 0:
+        temp_string = temp_string + '<break time="700ms"/>' + article[0][j]
+    else:
+        temp_string = temp_string + article[0][j]
 
-    file = open('/tmp/handler.txt','w+')
-    file.write(currentDate)
+file = open('/tmp/handler.txt','w+')
+file.write(currentDate)
+file.write('\n')
+file.write(temp_string)
+file.write('\n')
+j = 0
+for j in range(0, len(article[1])):
+    file.write(article[1][j])
     file.write('\n')
-    file.write(temp_string)
-    file.write('\n')
-    j = 0
-    for j in range(0, len(article[1])):
-        file.write(article[1][j])
-        file.write('\n')
 
 file.close()
 
