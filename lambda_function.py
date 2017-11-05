@@ -74,7 +74,11 @@ def get_article(genre):
         headlines.append(headline.text.strip())
         
         paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
-        p = paragraphs.find_all('p')
+        try:
+            p = paragraphs.find_all('p')
+        except:
+            continue
+
         tempstring = ''
         
         for item in p:
