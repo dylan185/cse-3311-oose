@@ -18,7 +18,7 @@ def get_page(the_string):
 
     return quote_page
 
-def get_article():
+def get_article(genre):
     temp_string = ''
     contents = []
     now = datetime.datetime.now()
@@ -28,8 +28,7 @@ def get_article():
     # Set webpage to specified want
     site_base = 'http://www.theshorthorn.com'
 
-    quote_page = get_page('news')
-    print(quote_page)
+    quote_page = get_page(genre)
 
     # Parse WebPage
     page = urllib.request.urlopen(quote_page)
