@@ -13,10 +13,37 @@ def get_page(the_string):
         quote_page = 'http://www.theshorthorn.com/life_and_entertainment/'
     elif the_string == 'opinion':
         quote_page = 'http://www.theshorthorn.com/opinion/'
+    elif the_string == 'events':
+        quote_page = 'http://www.theshorthorn.com/calendar/'
     else:
         quote_page = 'http://www.theshorthorn.com/news/'
 
     return quote_page
+
+def get_weather():
+    # Set the strings for welcome message
+    welcome = 'Welcome to U.T.A Short horn news! '
+    weather_temperature = "The temperature expected on campus today is "
+    weather_condition = ", and it is expected to be "
+    # Go to page
+    page = urllib.request.urlopen('https://www.accuweather.com/en/us/arlington-tx/76010/daily-weather-forecast/331134?day=1')
+    soup = BeautifulSoup(page, 'html.parser')
+
+    # Get the weather for the day
+    current_temperature = soup.find('span', attrs={'class': 'large-temp'})
+    current_condition = soup.find('div', attrs={'class': 'cond'})
+
+    # Strip to basic text
+    temperature = current_temperature.text.strip()
+    condition = current_condition.text.strip()
+    temperature = " ".join(temperature.split())
+    condition = " ".join(condition.split())
+
+    weather = welcome + weather_temperature + temperature + weather_condition + condition + "."
+
+    print(weather)
+
+    return weather
 
 def get_article(genre):
     temp_string = ''
@@ -25,70 +52,124 @@ def get_article(genre):
     currentDate = str(now)[:10]
     currentHour = now.hour
 
-    # Set webpage to specified want
+    # Set webpage to specified
     site_base = 'http://www.theshorthorn.com'
-
     quote_page = get_page(genre)
 
-    # Parse WebPage
-    page = urllib.request.urlopen(quote_page)
-    soup = BeautifulSoup(page, 'html.parser')
-
-    # Find Top Articles from Page
-    top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
-
-    # Get href links to articles and store in a list
-    links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
-
-    # Deletes the comment links for each article (every odd position)
-    del links[1::2]
-
-    # Declare whitelist, i &lists
-    i = 0
-    headlines = []
-    full_links = []
-    VALID_TAGS = ['p']
-
-    breaker = 1
-    # Piece together links
-    for link in links:
-        temp = site_base + link
-        if temp[:-9] not in full_links:
-            full_links.append(temp)
-        #print(temp)
-        else:
-            breaker = breaker - 1
-        if breaker == 6:
-            break
-        else:
-            breaker = breaker + 1
-
-    breaker = 1
-
-    # Goes to each link and gets headline and content
-
-    for link in full_links:
-        page = urllib.request.urlopen(link)
+    if genre == 'events':
+        # Parse Event WebPage
+        page = urllib.request.urlopen(quote_page)
         soup = BeautifulSoup(page, 'html.parser')
-        headline = soup.find('h1', attrs={'class': 'headline'})
-        headlines.append(headline.text.strip())
-        
-        paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
-        try:
-            p = paragraphs.find_all('p')
-        except:
-            continue
 
-        tempstring = ''
+        # Find Top Events from Page
+        top_events = soup.find('div', attrs={'id': 'tncms-region-index-full'})
+
+        # Get href links to events and store in a list
+        links = [a['href'] for a in top_events.find_all('a', href=True) if a.text.strip()]
+
+        # Enter loop to build the list of links and pull data & set up the list to put in
+        full_links = []
+        breaker = 1
+        for link in links:
+            temp = site_base + link
+            if temp[:-9] not in full_links:
+                full_links.append(temp)
+            else:
+                breaker = breaker - 1
+            if breaker == 5:
+                break
+            else:
+                breaker = breaker + 1
         
-        for item in p:
-            tempstring = tempstring + ' ' + item.get_text(strip=True)
-        
-        contents.append(tempstring)
-        if breaker == 6:
-            break
-        else:
-            breaker = breaker + 1
+        breaker = 1
+
+        # Get rid of the first trash address
+        del full_links[0]
+        event_list = []
+
+        # Enter loop to go to each event and get data
+        for link in full_links:
+            temp = []
+            page = urllib.request.urlopen(link)
+            soup = BeautifulSoup(page, 'html.parser')
+            event_name = soup.find('h1', attrs={'itemprop': 'name'})
+            event_date_time = soup.find('div', attrs={'class': 'event-time'})
+            event_location = soup.find('div', attrs={'class': 'event-venue'})
+
+            # Get rid of all annoying \n, \t, and excessive spaces
+            name = event_name.text.strip()
+            date_time = event_date_time.text.strip()
+            location = event_location.text.strip()
+            name = " ".join(name.split())
+            date_time = " ".join(date_time.split())
+            location = " ".join(location.split())
+
+            temp.append(name)
+            temp.append(date_time)
+            temp.append(location)
+
+            event_list.append(temp)
+
+        return event_list
+            
+    else:
+        # Parse WebPage
+        page = urllib.request.urlopen(quote_page)
+        soup = BeautifulSoup(page, 'html.parser')
+
+        # Find Top Articles from Page
+        top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
+
+        # Get href links to articles and store in a list
+        links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
+
+        # Deletes the comment links for each article (every odd position)
+        del links[1::2]
+
+        # Declare whitelist, i &lists
+        i = 0
+        headlines = []
+        full_links = []
+        VALID_TAGS = ['p']
+
+        breaker = 1
+        # Piece together links
+        for link in links:
+            temp = site_base + link
+            if temp[:-9] not in full_links:
+                full_links.append(temp)
+            else:
+                breaker = breaker - 1
+            if breaker == 6:
+                break
+            else:
+                breaker = breaker + 1
+
+        breaker = 1
+
+        # Goes to each link and gets headline and content
+        for link in full_links:
+            page = urllib.request.urlopen(link)
+            soup = BeautifulSoup(page, 'html.parser')
+            headline = soup.find('h1', attrs={'class': 'headline'})
+            headlines.append(headline.text.strip())
+            
+            paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
+            try:
+                p = paragraphs.find_all('p')
+            except:
+                continue
+
+            tempstring = ''
+            
+            for item in p:
+                tempstring = tempstring + ' ' + item.get_text(strip=True)
+            
+            contents.append(tempstring)
+            if breaker == 6:
+                break
+            else:
+                breaker = breaker + 1
 
     # Combine into 2D list
     article = [headlines, contents]
@@ -115,6 +196,8 @@ def get_article(genre):
     final_article = [temp_string, contents]
     return final_article
 
+get_weather()
+
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
 def lambda_handler(event, context):
     # This is to check to make sure our app is the only skill that can access this lambda function
@@ -124,7 +207,7 @@ def lambda_handler(event, context):
     #Thus is where we return a response in JASON format to the Alexa skill speach output.
     #intentName=event["request"]["intent"]["name"]
     if event["request"]["type"] == 'LaunchRequest':
-        welcome_message = 'Welcome to U.T.A Short horn news!'
+        welcome_message = get_weather()
         response_1 = {
         'version': '1.0',
         'response': {
