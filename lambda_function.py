@@ -41,8 +41,6 @@ def get_weather():
 
     weather = welcome + weather_temperature + temperature + weather_condition + condition + "."
 
-    print(weather)
-
     return weather
 
 def get_article(genre):
@@ -195,8 +193,6 @@ def get_article(genre):
     # Set and return the final article
     final_article = [temp_string, contents]
     return final_article
-
-get_weather()
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
 def lambda_handler(event, context):
