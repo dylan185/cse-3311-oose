@@ -174,7 +174,6 @@ def get_article(genre):
                 p = paragraphs.find_all('p')
                 headlines.append(headline.text.strip())
             except:
-                print('Found Error')
                 continue
             
             tempstring = ''
@@ -217,9 +216,9 @@ def get_article(genre):
     return final_article
 
 #sample = get_weather()
-#print(get_weather)
+#print(get_weather())
 
-print(get_article('news'))
+#print(get_article('news'))
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
 def create_response(input):
@@ -242,7 +241,7 @@ def lambda_handler(event, context):
     #Thus is where we return a response in JASON format to the Alexa skill speach output.
     #intentName=event["request"]["intent"]["name"]
     if event["request"]["type"] == 'LaunchRequest':
-        #        welcome_message = get_weather()
+        welcome_message = get_weather()
         return create_response(welcome_message)
     
     elif event["request"]["type"] == 'IntentRequest':
