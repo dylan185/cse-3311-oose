@@ -47,18 +47,18 @@ def get_weather():
 
 
 def num_convert(num):
-    if(num == '1st'):
+    if(num == '1st' or num == 'first'):
         return 0
-    elif num == '2nd':
+    elif num == '2nd' or num == 'second':
         return 1
-    elif num == '3rd':
+    elif num == '3rd' or num == 'third':
         return 2
-    elif num == '4th':
+    elif num == '4th' or num == 'fourth':
+        return 3
+    elif num == '5th' or num == 'fifth':
         return 4
-    elif num == '5th':
+    elif num == '6th' or num == 'sixth':
         return 5
-    elif num == '6th':
-        return 6
     else:
         return -1
 
@@ -189,30 +189,30 @@ def get_article(genre):
                 breaker = breaker + 1
 
 # Combine into 2D list
-article = [headlines, contents]
+    article = [headlines, contents]
 
-# Adds in the command for alexa to pause inbetween article headlines
-for j in range(0, len(article[0])):
-    if j != 0:
-        temp_string = temp_string + '<break time="700ms"/>' + article[0][j]
+    # Adds in the command for alexa to pause inbetween article headlines
+    for j in range(0, len(article[0])):
+        if j != 0:
+            temp_string = temp_string + '<break time="700ms"/>' + article[0][j]
         else:
             temp_string = temp_string + article[0][j]
 
-# Start checking the content and headlines for blacklisted words
-blacklist = [['news-editor.shorthorn@uta.edu', 'news-editor dot shorthorn at U.T.A dot E.D.U'], [' @', ' Author '], ['uta.edu', ' U.T.A dot e.d.u'], ['\xa0', ' '], ['UTA', ' U.T.A '], ['10-20-30', 'ten-twenty-thirty']]
-#['\\',' ']
-m = 0
+    # Start checking the content and headlines for blacklisted words
+    blacklist = [['news-editor.shorthorn@uta.edu', 'news-editor dot shorthorn at U.T.A dot E.D.U'], [' @', ' Author '], ['uta.edu', ' U.T.A dot e.d.u'], ['\xa0', ' '], ['UTA', ' U.T.A '], ['10-20-30', 'ten-twenty-thirty']]
+    #['\\',' ']
+    m = 0
     for m in range(0, len(blacklist)):
         temp_string = re.sub(blacklist[m][0], blacklist[m][1], temp_string, flags=re.IGNORECASE)
-m = 0
+    m = 0
     for m in range(0, len(contents)):
         k = 0
         for k in range(0, len(blacklist)):
             contents[m] = re.sub(blacklist[k][0], blacklist[k][1], contents[m], flags=re.IGNORECASE)
 
-# Set and return the final article
-final_article = [temp_string, contents]
-return final_article
+    # Set and return the final article
+    final_article = [temp_string, contents]
+    return final_article
 
 #sample = get_weather()
 #print(get_weather)
@@ -295,6 +295,34 @@ def lambda_handler(event, context):
                                 }
                                 }
                             }
+                return response_2
+        elif intentName == 'ReadSpecificArticleGenre':
+            num = event["request"]["intent"]["slots"]["Num"]["value"]
+            Genre = event["request"]["intent"]["slots"]["Gen"]["value"]
+            GT = get_article(Genre)
+            num = num_convert(num)
+            if (num != -1):
+                content = GT[1][num]
+                response_2 =    {
+                    'version': '1.0',
+                        'response': {
+                            'outputSpeech': {
+                                'type': 'PlainText',
+                                    'text': content,
+                                        }
+                                        }
+                                    }
+                return response_2
+            else:
+                response_2 =    {
+                'version': '1.0',
+                    'response': {
+                        'outputSpeech': {
+                            'type': 'PlainText',
+                                'text': 'Invalid Request',
+                                }
+                            }
+                        }
                 return response_2
 
 
