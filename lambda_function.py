@@ -61,7 +61,65 @@ def num_convert(num):
     else:
         return -1
 
+def get_events():
+    # Finds the current events on campus and returns a list of the events with times, locations, names
+    # Parse Event WebPage
+    page = urllib.request.urlopen(quote_page)
+    soup = BeautifulSoup(page, 'html.parser')
+    
+    # Find Top Events from Page
+    top_events = soup.find('div', attrs={'id': 'tncms-region-index-full'})
+    
+    # Get href links to events and store in a list
+    links = [a['href'] for a in top_events.find_all('a', href=True) if a.text.strip()]
+    
+    # Enter loop to build the list of links and pull data & set up the list to put in
+    full_links = []
+    breaker = 1
+    for link in links:
+        temp = site_base + link
+        if temp[:-9] not in full_links:
+            full_links.append(temp)
+        else:
+            breaker = breaker - 1
+        if breaker == 5:
+            break
+        else:
+            breaker = breaker + 1
+    
+    breaker = 1
+    
+    # Get rid of the first trash address
+    del full_links[0]
+    event_list = []
+    
+    # Enter loop to go to each event and get data
+    for link in full_links:
+        temp = []
+        page = urllib.request.urlopen(link)
+        soup = BeautifulSoup(page, 'html.parser')
+        event_name = soup.find('h1', attrs={'itemprop': 'name'})
+        event_date_time = soup.find('div', attrs={'class': 'event-time'})
+        event_location = soup.find('div', attrs={'class': 'event-venue'})
+        
+        # Get rid of all annoying \n, \t, and excessive spaces
+        name = event_name.text.strip()
+        date_time = event_date_time.text.strip()
+        location = event_location.text.strip()
+        name = " ".join(name.split())
+        date_time = " ".join(date_time.split())
+        location = " ".join(location.split())
+        
+        temp.append(name)
+        temp.append(date_time)
+        temp.append(location)
+        
+        event_list.append(temp)
+    
+    return event_list
+
 def get_article(genre):
+    # This will find all the articles of today and return a list of headlines and contents
     temp_string = ''
     contents = []
     now = datetime.datetime.now()
@@ -72,124 +130,66 @@ def get_article(genre):
     site_base = 'http://www.theshorthorn.com'
     quote_page = get_page(genre)
     
-    if genre == 'events':
-        # Parse Event WebPage
-        page = urllib.request.urlopen(quote_page)
-        soup = BeautifulSoup(page, 'html.parser')
-        
-        # Find Top Events from Page
-        top_events = soup.find('div', attrs={'id': 'tncms-region-index-full'})
-        
-        # Get href links to events and store in a list
-        links = [a['href'] for a in top_events.find_all('a', href=True) if a.text.strip()]
-        
-        # Enter loop to build the list of links and pull data & set up the list to put in
-        full_links = []
-        breaker = 1
-        for link in links:
-            temp = site_base + link
-            if temp[:-9] not in full_links:
-                full_links.append(temp)
-            else:
-                breaker = breaker - 1
-            if breaker == 5:
-                break
-            else:
-                breaker = breaker + 1
-        
-        breaker = 1
-        
-        # Get rid of the first trash address
-        del full_links[0]
-        event_list = []
-        
-        # Enter loop to go to each event and get data
-        for link in full_links:
-            temp = []
-            page = urllib.request.urlopen(link)
-            soup = BeautifulSoup(page, 'html.parser')
-            event_name = soup.find('h1', attrs={'itemprop': 'name'})
-            event_date_time = soup.find('div', attrs={'class': 'event-time'})
-            event_location = soup.find('div', attrs={'class': 'event-venue'})
-            
-            # Get rid of all annoying \n, \t, and excessive spaces
-            name = event_name.text.strip()
-            date_time = event_date_time.text.strip()
-            location = event_location.text.strip()
-            name = " ".join(name.split())
-            date_time = " ".join(date_time.split())
-            location = " ".join(location.split())
-            
-            temp.append(name)
-            temp.append(date_time)
-            temp.append(location)
-            
-            event_list.append(temp)
-        
-        return event_list
+    # Parse WebPage
+    page = urllib.request.urlopen(quote_page)
+    soup = BeautifulSoup(page, 'html.parser')
     
-    else:
-        # Parse WebPage
-        page = urllib.request.urlopen(quote_page)
-        soup = BeautifulSoup(page, 'html.parser')
-        
-        # Find Top Articles from Page
-        top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
-        
-        # Get href links to articles and store in a list
-        links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
-        
-        # Deletes the comment links for each article (every odd position)
-        del links[1::2]
-        
-        # Declare whitelist, i &lists
-        i = 0
-        headlines = []
-        full_links = []
-        VALID_TAGS = ['p']
-        
-        breaker = 1
-        # Piece together links
-        for link in links:
-            temp = site_base + link
-            if temp[:-9] not in full_links:
-                full_links.append(temp)
-            else:
-                breaker = breaker - 1
-            if breaker == 10:
-                break
-            else:
-                breaker = breaker + 1
+    # Find Top Articles from Page
+    top_articles = soup.find('div', attrs={'id': 'tncms-region-index-primary'})
     
-        breaker = 1
-        
-        # Goes to each link and gets headline and content
-        for link in full_links:
-            page = urllib.request.urlopen(link)
-            soup = BeautifulSoup(page, 'html.parser')
-            headline = soup.find('h1', attrs={'class': 'headline'})
-            
-            paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
-            try:
-                p = paragraphs.find_all('p')
-                headlines.append(headline.text.strip())
-            except:
-                continue
-            
-            tempstring = ''
-            
-            for item in p:
-                tempstring = tempstring + ' ' + item.get_text(strip=True)
-            
-            contents.append(tempstring)
-            if breaker == 6:
-                break
-            else:
-                breaker = breaker + 1
+    # Get href links to articles and store in a list
+    links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
+    
+    # Deletes the comment links for each article (every odd position)
+    del links[1::2]
+    
+    # Declare whitelist, i &lists
+    i = 0
+    headlines = []
+    full_links = []
+    VALID_TAGS = ['p']
+    
+    breaker = 1
+    # Piece together links
+    for link in links:
+        temp = site_base + link
+        if temp[:-9] not in full_links:
+            full_links.append(temp)
+        else:
+            breaker = breaker - 1
+        if breaker == 10:
+            break
+        else:
+            breaker = breaker + 1
 
-# Combine into 2D list
+    breaker = 1
+    
+    # Goes to each link and gets headline and content
+    for link in full_links:
+        page = urllib.request.urlopen(link)
+        soup = BeautifulSoup(page, 'html.parser')
+        headline = soup.find('h1', attrs={'class': 'headline'})
+        
+        paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
+        try:
+            p = paragraphs.find_all('p')
+            headlines.append(headline.text.strip())
+        except:
+            continue
+        
+        tempstring = ''
+        
+        for item in p:
+            tempstring = tempstring + ' ' + item.get_text(strip=True)
+        
+        contents.append(tempstring)
+        if breaker == 6:
+            break
+        else:
+            breaker = breaker + 1
+
+    # Combine into 2D list
     article = [headlines, contents]
-    print(len(headlines), len(contents))
 
     # Adds in the command for alexa to pause inbetween article headlines
     for j in range(0, len(article[0])):
