@@ -236,7 +236,7 @@ def get_article(genre):
 
 #sample = get_weather()
 #print(get_weather())
-print(event_wrapper())
+#print(event_wrapper())
 #print(get_article('news'))
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
