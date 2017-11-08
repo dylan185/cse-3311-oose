@@ -222,6 +222,18 @@ def get_article(genre):
 print(get_article('news'))
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
+def create_response(input):
+    output = '<speak>' + input + '</speak>'
+    response_2 =    {
+        'version': '1.0',
+            'response': {
+                'outputSpeech': {
+                    'type': 'SSML',
+                    'ssml': output,
+                    }
+                    }
+                }
+    return response_2
 def lambda_handler(event, context):
     # This is to check to make sure our app is the only skill that can access this lambda function
     # if (event['session']['application']['applicationId'] !=
@@ -231,73 +243,32 @@ def lambda_handler(event, context):
     #intentName=event["request"]["intent"]["name"]
     if event["request"]["type"] == 'LaunchRequest':
         #        welcome_message = get_weather()
-        welcome_message = 'Welcome to U.T.A Short horn news! '
-        response_1 = {
-        'version': '1.0',
-        'response': {
-            'outputSpeech': {
-                'type': 'PlainText',
-                'text': welcome_message,
-        }
-        }
-        }
-        return response_1
+        return create_response(welcome_message)
+    
     elif event["request"]["type"] == 'IntentRequest':
         intentName=event["request"]["intent"]["name"]
         if intentName == 'ReadHeadlinesIntent':
             GT = get_article("news")
             headlines_out = GT[0]
-            response_2 =    {
-            'version': '1.0',
-            'response': {
-                'outputSpeech': {
-                    'type': 'PlainText',
-                    'text': headlines_out,
-                    }
-                        }
-                    }
-            return response_2
+            return create_response(headlines_out)
+        
         elif intentName == 'ReadGenreHeadlines':
             Genre = event["request"]["intent"]["slots"]["Gen"]["value"]
             GT = get_article(Genre)
             headlines_out = GT[0]
-            response_2 =    {
-                'version': '1.0',
-                    'response': {
-                        'outputSpeech': {
-                            'type': 'PlainText',
-                                'text': headlines_out,
-                                }
-                                }
-                            }
-            return response_2
+            return create_response(headlines_out)
+        
         elif intentName == 'ReadSpecificArticle':
             num = event["request"]["intent"]["slots"]["Num"]["value"]
             GT = get_article('news')
             num = num_convert(num)
             if (num != -1):
                 content = GT[1][num]
-                response_2 =    {
-                'version': '1.0',
-                    'response': {
-                        'outputSpeech': {
-                            'type': 'PlainText',
-                                'text': content,
-                                }
-                                }
-                            }
-                return response_2
+                return create_response(content)
+            
             else:
-                response_2 =    {
-                'version': '1.0',
-                    'response': {
-                        'outputSpeech': {
-                            'type': 'PlainText',
-                                'text': 'Invalid Request',
-                                }
-                                }
-                            }
-                return response_2
+                return create_response('Invalid Request')
+
         elif intentName == 'ReadSpecificArticleGenre':
             num = event["request"]["intent"]["slots"]["Num"]["value"]
             Genre = event["request"]["intent"]["slots"]["Gen"]["value"]
@@ -305,27 +276,9 @@ def lambda_handler(event, context):
             num = num_convert(num)
             if (num != -1):
                 content = GT[1][num]
-                response_2 =    {
-                    'version': '1.0',
-                        'response': {
-                            'outputSpeech': {
-                                'type': 'PlainText',
-                                    'text': content,
-                                        }
-                                        }
-                                    }
-                return response_2
+                return create_response(content)
             else:
-                response_2 =    {
-                'version': '1.0',
-                    'response': {
-                        'outputSpeech': {
-                            'type': 'PlainText',
-                                'text': 'Invalid Request',
-                                }
-                            }
-                        }
-                return response_2
+                return create_response('Invalid Request')
 
 
 #returning the response JASON structure
