@@ -4,6 +4,7 @@ import datetime
 import re
 from bs4 import BeautifulSoup
 
+
 def get_page(the_string):
     # This function gets the correct webpage depending on the string sent
     quote_page = ''
@@ -23,7 +24,7 @@ def get_page(the_string):
 def get_weather():
     # Set the strings for welcome message
     welcome = 'Welcome to U.T.A Short horn news! '
-    weather_temperature = "Today on campus it is "
+    weather_temperature = "Today, on campus it is "
     weather_condition = ", and it is expected to be "
     # Go to page
     page = urllib.request.urlopen('https://www.accuweather.com/en/us/arlington-tx/76010/daily-weather-forecast/331134?day=1')
@@ -278,6 +279,9 @@ def lambda_handler(event, context):
                 return create_response(content)
             else:
                 return create_response('Invalid Request')
+        elif intentName == 'EventsIntent':
+            output = event_wrapper()
+            return create_response(output)
 
 
 #returning the response JASON structure
