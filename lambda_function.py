@@ -45,7 +45,6 @@ def get_weather():
     
     return weather
 
-
 def num_convert(num):
     if(num == '1st' or num == 'first'):
         return 0
@@ -157,7 +156,7 @@ def get_article(genre):
                 full_links.append(temp)
             else:
                 breaker = breaker - 1
-            if breaker == 6:
+            if breaker == 10:
                 break
             else:
                 breaker = breaker + 1
@@ -169,12 +168,13 @@ def get_article(genre):
             page = urllib.request.urlopen(link)
             soup = BeautifulSoup(page, 'html.parser')
             headline = soup.find('h1', attrs={'class': 'headline'})
-            headlines.append(headline.text.strip())
             
             paragraphs = soup.find('div', attrs={'class': 'asset-content subscriber-premium'})
             try:
                 p = paragraphs.find_all('p')
+                headlines.append(headline.text.strip())
             except:
+                print('Found Error')
                 continue
             
             tempstring = ''
@@ -190,6 +190,7 @@ def get_article(genre):
 
 # Combine into 2D list
     article = [headlines, contents]
+    print(len(headlines), len(contents))
 
     # Adds in the command for alexa to pause inbetween article headlines
     for j in range(0, len(article[0])):
@@ -212,12 +213,13 @@ def get_article(genre):
 
     # Set and return the final article
     final_article = [temp_string, contents]
+
     return final_article
 
 #sample = get_weather()
 #print(get_weather)
 
-#print(get_article('news'))
+print(get_article('news'))
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
 def lambda_handler(event, context):
