@@ -23,7 +23,7 @@ def get_page(the_string):
 def get_weather():
     # Set the strings for welcome message
     welcome = 'Welcome to U.T.A Short horn news! '
-    weather_temperature = "The temperature expected on campus today is "
+    weather_temperature = "Today on campus it is "
     weather_condition = ", and it is expected to be "
     # Go to page
     page = urllib.request.urlopen('https://www.accuweather.com/en/us/arlington-tx/76010/daily-weather-forecast/331134?day=1')
