@@ -13,8 +13,6 @@ def get_page(the_string):
         quote_page = 'http://www.theshorthorn.com/life_and_entertainment/'
     elif the_string == 'opinion':
         quote_page = 'http://www.theshorthorn.com/opinion/'
-    elif the_string == 'events':
-        quote_page = 'http://www.theshorthorn.com/calendar/'
     else:
         quote_page = 'http://www.theshorthorn.com/news/'
     
@@ -61,9 +59,29 @@ def num_convert(num):
     else:
         return -1
 
+def event_wrapper():
+    # Wrapper function for the events that will call the event function and turn it into a string.
+    # It will also filter the events through a blacklist if needed.
+
+    # Get events
+    event_list = get_events()
+
+    # Convert the list into a string
+    event_string = 'The current events today are <break time="700ms"/>'
+    for j in range(0, len(event_list[0])):
+        if j != 0:
+            event_string = event_string + '<break time="700ms"/>' + event_list[j][0] + ' on ' + event_list[j][1] + ' at ' + event_list[j][2]
+        else:
+            event_string = event_string + event_list[j][0] + ' on ' + event_list[j][1] + ' at ' + event_list[j][2]
+
+    return event_string
+
 def get_events():
     # Finds the current events on campus and returns a list of the events with times, locations, names
+    
     # Parse Event WebPage
+    site_base = 'http://www.theshorthorn.com'
+    quote_page = 'http://www.theshorthorn.com/calendar/'
     page = urllib.request.urlopen(quote_page)
     soup = BeautifulSoup(page, 'html.parser')
     
@@ -217,7 +235,7 @@ def get_article(genre):
 
 #sample = get_weather()
 #print(get_weather())
-
+print(event_wrapper())
 #print(get_article('news'))
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
