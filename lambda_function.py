@@ -279,6 +279,7 @@ def lambda_handler(event, context):
                 return create_response(content)
             else:
                 return create_response('Invalid Request')
+
         elif intentName == 'EventsIntent':
             output = event_wrapper()
             return create_response(output)
