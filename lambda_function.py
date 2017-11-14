@@ -100,7 +100,10 @@ def event_wrapper():
 
 def get_events():
     # Finds the current events on campus and returns a list of the events with times, locations, names
-    os.remove("/tmp/event.txt")
+    try:
+        os.remove("/tmp/event.txt")
+    except:
+        print('do nothing')
     # Parse Event WebPage
     site_base = 'http://www.theshorthorn.com'
     quote_page = 'http://www.theshorthorn.com/calendar/'
@@ -157,25 +160,16 @@ def get_events():
         event_list.append(temp)
     
     file = open('/tmp/event.txt','w+')
-    file.write(currentDate)
-    file.write('\n')
-    j = 0
-    for j in range(0, len(event_list)):
-        file.write(event_list[j])
-        file.write('\n')
-    file.close()
-
-    file = open('/tmp/event.txt','w+')
 #    file = open('event.txt','w+')
     file.write(currentDate)
     file.write('\n')
     j = 0
-        for j in range(0, len(event_list)):
-            for i in range(0, len(event_list[j])):
-                file.write(event_list[j][i])
-                if(i != (len(event_list[j]) - 1)):
-                    file.write('@!')
-            file.write('\n')
+    for j in range(0, len(event_list)):
+        for i in range(0, len(event_list[j])):
+            file.write(event_list[j][i])
+            if(i != (len(event_list[j]) - 1)):
+                file.write('@!')
+        file.write('\n')
     file.close()
     return event_list
 
