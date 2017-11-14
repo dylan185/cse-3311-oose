@@ -4,6 +4,9 @@ import datetime
 import re
 from bs4 import BeautifulSoup
 
+now = datetime.datetime.now()
+currentDate = str(now)[:10]
+currentHour = now.hour
 
 def get_page(the_string):
     # This function gets the correct webpage depending on the string sent
@@ -63,23 +66,41 @@ def num_convert(num):
 def event_wrapper():
     # Wrapper function for the events that will call the event function and turn it into a string.
     # It will also filter the events through a blacklist if needed.
-
+    
     # Get events
-    event_list = get_events()
+    eventDate = ''
+    event_list = []
+    try:
+        file = open("/tmp/event.txt", "r")
+#        file = open("event.txt", "r")
+        data = file.read().splitlines()
+        eventDate = data[0][:10]
+        for i in range(1, len(data)):
+            event_list.append(data[i].split("@!"))
+    except:
+        event_list = get_events()
+    finally:
+        if(eventDate != currentDate):
+            event_list = get_events()
 
-    # Convert the list into a string
+#event_list = get_events()
+# Convert the list into a string
     event_string = 'The current events today are <break time="700ms"/>'
-    for j in range(0, len(event_list[0])):
+    for j in range(0, len(event_list)):
+        temp = event_list[j][1]
+        try:
+            temp = ' . . at ' + temp.split("@ ",1)[1]
+        except:
+            temp = ''
         if j != 0:
-            event_string = event_string + '<break time="700ms"/>' + event_list[j][0] + ' on ' + event_list[j][1] + ' at ' + event_list[j][2]
+            event_string = event_string + '<break time="700ms"/>' + event_list[j][0] +  temp + ' in ' + event_list[j][2] + ' '
         else:
-            event_string = event_string + event_list[j][0] + ' on ' + event_list[j][1] + ' at ' + event_list[j][2]
-
+            event_string = event_string + event_list[j][0] +  temp + ' in ' + event_list[j][2] + ' '
     return event_string
 
 def get_events():
     # Finds the current events on campus and returns a list of the events with times, locations, names
-    
+    os.remove("/tmp/event.txt")
     # Parse Event WebPage
     site_base = 'http://www.theshorthorn.com'
     quote_page = 'http://www.theshorthorn.com/calendar/'
@@ -135,6 +156,27 @@ def get_events():
         
         event_list.append(temp)
     
+    file = open('/tmp/event.txt','w+')
+    file.write(currentDate)
+    file.write('\n')
+    j = 0
+    for j in range(0, len(event_list)):
+        file.write(event_list[j])
+        file.write('\n')
+    file.close()
+
+    file = open('/tmp/event.txt','w+')
+#    file = open('event.txt','w+')
+    file.write(currentDate)
+    file.write('\n')
+    j = 0
+        for j in range(0, len(event_list)):
+            for i in range(0, len(event_list[j])):
+                file.write(event_list[j][i])
+                if(i != (len(event_list[j]) - 1)):
+                    file.write('@!')
+            file.write('\n')
+    file.close()
     return event_list
 
 def get_article(genre):
