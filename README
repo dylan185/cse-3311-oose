@@ -1,0 +1,12 @@
+Alexa Shorthorn News
+
+We would like to make it easier for students to keep up with daily UTA campus news and 
+events via a new Amazon Echo custom skill.
+
+We chose this project to help students keep track of the current news without the hassle
+of having to pull up the Shorthorn website or read the paper. It's a hands-free method
+of keeping up to date with current events.
+
+This is a Alexa news skill that can read the UTA Shorthorn News. It can read teh Sports, 
+Opinion, Life & Entertainment, and just default news. Also, it has the ability to read the 
+name, time, and location of the current daily events that are happening on campus. 
