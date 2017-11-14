@@ -173,8 +173,48 @@ def get_events():
     file.close()
     return event_list
 
+def get_article_wrapper(genre1):
+    articleDate = ''
+    contents = []
+    checker = False
+    genre = ''
+    if(genre1 == 'life and entertainment'):
+        genre = 'life entertainment'
+    else:
+        genre = genre1
+    
+    fname = '/tmp/' + genre + '.txt'
+    #fname = genre + '.txt'
+    final_article = []
+    try:
+        file = open(fname, "r")
+        data = file.read().splitlines()
+        articleDate = data[0][:10]
+        i = 0
+        for i in range(2, len(data)):
+            contents.append(data[i])
+        temp_string = data[1]
+        final_article = [temp_string, contents]
+#print('Try\n')
+    except:
+        final_article = get_article(genre)
+        checker = True
+#print('except\n')
+    finally:
+        if (articleDate != currentDate) and (currentHour > 9) and (checker == False):
+            final_article = get_article(genre)
+#print('finally\n')
+
+
+    return final_article
 def get_article(genre):
     # This will find all the articles of today and return a list of headlines and contents
+    fname = '/tmp/' + genre + '.txt'
+    try:
+        os.remove(fname)
+    except:
+        print('do nothing')
+
     temp_string = ''
     contents = []
     now = datetime.datetime.now()
@@ -267,7 +307,17 @@ def get_article(genre):
 
     # Set and return the final article
     final_article = [temp_string, contents]
+    file = open(fname,'w+')
+    file.write(currentDate)
+    file.write('\n')
+    file.write(temp_string)
+    file.write('\n')
+    j = 0
+    for j in range(0, len(article[1])):
+        file.write(article[1][j])
+        file.write('\n')
 
+    file.close()
     return final_article
 
 #sample = get_weather()
@@ -302,19 +352,19 @@ def lambda_handler(event, context):
     elif event["request"]["type"] == 'IntentRequest':
         intentName=event["request"]["intent"]["name"]
         if intentName == 'ReadHeadlinesIntent':
-            GT = get_article("news")
+            GT = get_article_wrapper("news")
             headlines_out = GT[0]
             return create_response(headlines_out)
         
         elif intentName == 'ReadGenreHeadlines':
             Genre = event["request"]["intent"]["slots"]["Gen"]["value"]
-            GT = get_article(Genre)
+            GT = get_article_wrapper(Genre)
             headlines_out = GT[0]
             return create_response(headlines_out)
         
         elif intentName == 'ReadSpecificArticle':
             num = event["request"]["intent"]["slots"]["Num"]["value"]
-            GT = get_article('news')
+            GT = get_article_wrapper('news')
             num = num_convert(num)
             if (num != -1):
                 content = GT[1][num]
@@ -326,7 +376,7 @@ def lambda_handler(event, context):
         elif intentName == 'ReadSpecificArticleGenre':
             num = event["request"]["intent"]["slots"]["Num"]["value"]
             Genre = event["request"]["intent"]["slots"]["Gen"]["value"]
-            GT = get_article(Genre)
+            GT = get_article_wrapper(Genre)
             num = num_convert(num)
             if (num != -1):
                 content = GT[1][num]
