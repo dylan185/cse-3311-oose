@@ -4,6 +4,9 @@ import datetime
 import re
 from bs4 import BeautifulSoup
 
+now = datetime.datetime.now()
+currentDate = str(now)[:10]
+currentHour = now.hour
 
 def get_page(the_string):
     # This function gets the correct webpage depending on the string sent
@@ -63,23 +66,44 @@ def num_convert(num):
 def event_wrapper():
     # Wrapper function for the events that will call the event function and turn it into a string.
     # It will also filter the events through a blacklist if needed.
-
+    
     # Get events
-    event_list = get_events()
+    eventDate = ''
+    event_list = []
+    try:
+        file = open("/tmp/event.txt", "r")
+#        file = open("event.txt", "r")
+        data = file.read().splitlines()
+        eventDate = data[0][:10]
+        for i in range(1, len(data)):
+            event_list.append(data[i].split("@!"))
+    except:
+        event_list = get_events()
+    finally:
+        if(eventDate != currentDate):
+            event_list = get_events()
 
-    # Convert the list into a string
+#event_list = get_events()
+# Convert the list into a string
     event_string = 'The current events today are <break time="700ms"/>'
-    for j in range(0, len(event_list[0])):
+    for j in range(0, len(event_list)):
+        temp = event_list[j][1]
+        try:
+            temp = ' . . at ' + temp.split("@ ",1)[1]
+        except:
+            temp = ''
         if j != 0:
-            event_string = event_string + '<break time="700ms"/>' + event_list[j][0] + ' on ' + event_list[j][1] + ' at ' + event_list[j][2]
+            event_string = event_string + '<break time="700ms"/>' + event_list[j][0] +  temp + ' in ' + event_list[j][2] + ' '
         else:
-            event_string = event_string + event_list[j][0] + ' on ' + event_list[j][1] + ' at ' + event_list[j][2]
-
+            event_string = event_string + event_list[j][0] +  temp + ' in ' + event_list[j][2] + ' '
     return event_string
 
 def get_events():
     # Finds the current events on campus and returns a list of the events with times, locations, names
-    
+    try:
+        os.remove("/tmp/event.txt")
+    except:
+        print('do nothing')
     # Parse Event WebPage
     site_base = 'http://www.theshorthorn.com'
     quote_page = 'http://www.theshorthorn.com/calendar/'
@@ -135,10 +159,62 @@ def get_events():
         
         event_list.append(temp)
     
+    file = open('/tmp/event.txt','w+')
+#    file = open('event.txt','w+')
+    file.write(currentDate)
+    file.write('\n')
+    j = 0
+    for j in range(0, len(event_list)):
+        for i in range(0, len(event_list[j])):
+            file.write(event_list[j][i])
+            if(i != (len(event_list[j]) - 1)):
+                file.write('@!')
+        file.write('\n')
+    file.close()
     return event_list
 
+def get_article_wrapper(genre1):
+    articleDate = ''
+    contents = []
+    checker = False
+    genre = ''
+    if(genre1 == 'life and entertainment'):
+        genre = 'life entertainment'
+    else:
+        genre = genre1
+    
+    fname = '/tmp/' + genre + '.txt'
+    #fname = genre + '.txt'
+    final_article = []
+    try:
+        file = open(fname, "r")
+        data = file.read().splitlines()
+        articleDate = data[0][:10]
+        i = 0
+        for i in range(2, len(data)):
+            contents.append(data[i])
+        temp_string = data[1]
+        final_article = [temp_string, contents]
+#print('Try\n')
+    except:
+        final_article = get_article(genre)
+        checker = True
+#print('except\n')
+    finally:
+        if (articleDate != currentDate) and (currentHour > 9) and (checker == False):
+            final_article = get_article(genre)
+#print('finally\n')
+
+
+    return final_article
 def get_article(genre):
     # This will find all the articles of today and return a list of headlines and contents
+    fname = '/tmp/' + genre + '.txt'
+    try:
+        os.remove(fname)
+    except:
+        print('do nothing')
+
     temp_string = ''
     contents = []
     now = datetime.datetime.now()
@@ -231,12 +307,22 @@ def get_article(genre):
 
     # Set and return the final article
     final_article = [temp_string, contents]
+    file = open(fname,'w+')
+    file.write(currentDate)
+    file.write('\n')
+    file.write(temp_string)
+    file.write('\n')
+    j = 0
+    for j in range(0, len(article[1])):
+        file.write(article[1][j])
+        file.write('\n')
 
+    file.close()
     return final_article
 
 #sample = get_weather()
 #print(get_weather())
-print(event_wrapper())
+#print(event_wrapper())
 #print(get_article('news'))
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
@@ -266,19 +352,19 @@ def lambda_handler(event, context):
     elif event["request"]["type"] == 'IntentRequest':
         intentName=event["request"]["intent"]["name"]
         if intentName == 'ReadHeadlinesIntent':
-            GT = get_article("news")
+            GT = get_article_wrapper("news")
             headlines_out = GT[0]
             return create_response(headlines_out)
         
         elif intentName == 'ReadGenreHeadlines':
             Genre = event["request"]["intent"]["slots"]["Gen"]["value"]
-            GT = get_article(Genre)
+            GT = get_article_wrapper(Genre)
             headlines_out = GT[0]
             return create_response(headlines_out)
         
         elif intentName == 'ReadSpecificArticle':
             num = event["request"]["intent"]["slots"]["Num"]["value"]
-            GT = get_article('news')
+            GT = get_article_wrapper('news')
             num = num_convert(num)
             if (num != -1):
                 content = GT[1][num]
@@ -290,13 +376,14 @@ def lambda_handler(event, context):
         elif intentName == 'ReadSpecificArticleGenre':
             num = event["request"]["intent"]["slots"]["Num"]["value"]
             Genre = event["request"]["intent"]["slots"]["Gen"]["value"]
-            GT = get_article(Genre)
+            GT = get_article_wrapper(Genre)
             num = num_convert(num)
             if (num != -1):
                 content = GT[1][num]
                 return create_response(content)
             else:
                 return create_response('Invalid Request')
+
         elif intentName == 'EventsIntent':
             output = event_wrapper()
             return create_response(output)
