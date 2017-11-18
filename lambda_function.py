@@ -119,6 +119,13 @@ def event_wrapper():
             event_string = event_string + '<break time="700ms"/>' + event_list[j][0] +  temp + ' in ' + event_list[j][2] + ' '
         else:
             event_string = event_string + event_list[j][0] +  temp + ' in ' + event_list[j][2] + ' '
+    
+    # Start checking the events for blacklisted words
+    blacklist = [['uta.edu', ' U.T.A dot e.d.u'], ['\xa0', ' '], ['UTA', ' U.T.A '], ['&', ' and ']]
+    m = 0
+    for m in range(0, len(blacklist)):
+        event_string = re.sub(blacklist[m][0], blacklist[m][1], event_string, flags=re.IGNORECASE)
+    
     return event_string
 
 def get_events():
@@ -184,7 +191,6 @@ def get_events():
         event_list.append(temp)
     
     file = open('/tmp/event.txt','w+')
-#    file = open('event.txt','w+')
     file.write(currentDate)
     file.write('\n')
     j = 0
@@ -208,7 +214,6 @@ def get_article_wrapper(genre1):
         genre = genre1
     
     fname = '/tmp/' + genre + '.txt'
-    #fname = genre + '.txt'
     final_article = []
     try:
         file = open(fname, "r")
@@ -219,18 +224,16 @@ def get_article_wrapper(genre1):
             contents.append(data[i])
         temp_string = data[1]
         final_article = [temp_string, contents]
-#print('Try\n')
+
     except:
         final_article = get_article(genre)
         checker = True
-#print('except\n')
     finally:
         if (articleDate != currentDate) and (currentHour > 9) and (checker == False):
             final_article = get_article(genre)
-#print('finally\n')
-
 
     return final_article
+
 def get_article(genre):
     # This will find all the articles of today and return a list of headlines and contents
     fname = '/tmp/' + genre + '.txt'
