@@ -260,6 +260,7 @@ def get_article(genre):
     links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
     
     # Deletes the comment links for each article (every odd position)
+
     del links[1::2]
     
     # Declare whitelist, i &lists
