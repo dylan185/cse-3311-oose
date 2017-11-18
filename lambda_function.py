@@ -2,6 +2,7 @@ import urllib.request
 import os
 import datetime
 import re
+import json
 from bs4 import BeautifulSoup
 
 now = datetime.datetime.now()
@@ -26,24 +27,18 @@ def get_weather():
     # Set the strings for welcome message
     welcome = 'Welcome to U.T.A Short horn news! '
     weather_temperature = "Today, on campus it is "
-    weather_condition = ", and it is expected to be "
-    # Go to page
-    page = urllib.request.urlopen('https://www.accuweather.com/en/us/arlington-tx/76010/daily-weather-forecast/331134?day=1')
-    soup = BeautifulSoup(page, 'html.parser')
+    weather_condition = " degrees, and it is expected to be "
+    url = "http://api.wunderground.com/api/57d9e55c1fccce10/conditions/q/TX/Arlington.json"
+
+    request = urllib.request.Request(url)
+    response = json.load(urllib.request.urlopen(request))
     
-    # Get the weather for the day
-    current_temperature = soup.find('span', attrs={'class': 'large-temp'})
-    current_condition = soup.find('div', attrs={'class': 'cond'})
-    
-    # Strip to basic text
-    temperature = current_temperature.text.strip()
-    condition = current_condition.text.strip()
-    temperature = " ".join(temperature.split())
-    condition = " ".join(condition.split())
+    temperature = str(int(response["current_observation"]["temp_f"]))
+    condition = response["current_observation"]["weather"]
     
     weather = welcome + weather_temperature + temperature + weather_condition + condition + "."
     
-    #print(weather)
+    print(weather)
     
     return weather
 
@@ -63,6 +58,13 @@ def num_convert(num):
     else:
         return -1
 
+def suffix(d):
+    return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
+
+def custom_strftime(format, t):
+    return t.strftime(format).replace('{S}', str(t.day) + suffix(t.day))
+
+
 def event_wrapper():
     # Wrapper function for the events that will call the event function and turn it into a string.
     # It will also filter the events through a blacklist if needed.
@@ -72,7 +74,7 @@ def event_wrapper():
     event_list = []
     try:
         file = open("/tmp/event.txt", "r")
-#        file = open("event.txt", "r")
+        #        file = open("event.txt", "r")
         data = file.read().splitlines()
         eventDate = data[0][:10]
         for i in range(1, len(data)):
@@ -82,16 +84,37 @@ def event_wrapper():
     finally:
         if(eventDate != currentDate):
             event_list = get_events()
-
-#event_list = get_events()
-# Convert the list into a string
+    if not event_list:
+        return 'No events happening on campus today!'
+    #event_list = get_events()
+    # Convert the list into a string
     event_string = 'The current events today are <break time="700ms"/>'
     for j in range(0, len(event_list)):
         temp = event_list[j][1]
+        #print(event_list[j][1])
         try:
-            temp = ' . . at ' + temp.split("@ ",1)[1]
+            dt = temp.split("@ ",1)[0]
+            time = temp.split("@ ",1)[1]
+            if len(time) < 10:
+                temp = ' . . at ' + time
+            else:
+                temp = ' .. from ' + time
+            #print (custom_strftime('%B {S}, %Y', now))
+            currentDateFormat2 = custom_strftime('%B {S}, %Y', now)
+            currentDateFormat2 = currentDateFormat2 + ' '
+            try:
+                dt = dt.split(', ')
+                dt = dt[1] + ', ' + dt[2]
+                print(dt)
+            except:
+                print(dt)
+            
+            if(dt == currentDateFormat2):
+                print("True")
+            else:
+                continue
         except:
-            temp = ''
+            temp = ' . . happening right now'
         if j != 0:
             event_string = event_string + '<break time="700ms"/>' + event_list[j][0] +  temp + ' in ' + event_list[j][2] + ' '
         else:
@@ -119,17 +142,18 @@ def get_events():
     # Enter loop to build the list of links and pull data & set up the list to put in
     full_links = []
     breaker = 1
+    print('links: ' + str(len(links)))
     for link in links:
         temp = site_base + link
         if temp[:-9] not in full_links:
             full_links.append(temp)
         else:
             breaker = breaker - 1
-        if breaker == 5:
+        if breaker == 8:
             break
         else:
             breaker = breaker + 1
-    
+
     breaker = 1
     
     # Get rid of the first trash address
@@ -334,10 +358,28 @@ def create_response(input):
                 'outputSpeech': {
                     'type': 'SSML',
                     'ssml': output,
-                    }
+                    },
+                'shouldEndSession': 'false'
                     }
                 }
     return response_2
+
+def create_response_end(input):
+    output = '<speak>' + input + '</speak>'
+    response_2 =    {
+        'version': '1.0',
+            'response': {
+                'outputSpeech': {
+                    'type': 'SSML',
+                    'ssml': output,
+                    },
+                'shouldEndSession': 'true'
+                }
+        }
+    return response_2
+
+
+
 def lambda_handler(event, context):
     # This is to check to make sure our app is the only skill that can access this lambda function
     # if (event['session']['application']['applicationId'] !=
@@ -346,21 +388,25 @@ def lambda_handler(event, context):
     #Thus is where we return a response in JASON format to the Alexa skill speach output.
     #intentName=event["request"]["intent"]["name"]
     if event["request"]["type"] == 'LaunchRequest':
-        welcome_message = get_weather()
-        return create_response(welcome_message)
+        try:
+            welcome_message = get_weather()
+            welcome_message = welcome_message + '<break time="700ms"/> How can I help you?'
+            return create_response(welcome_message)
+        except:
+            return create_response('Welcome to U.T.A Short horn news! <break time="700ms"/> How can I help you?')
     
     elif event["request"]["type"] == 'IntentRequest':
         intentName=event["request"]["intent"]["name"]
         if intentName == 'ReadHeadlinesIntent':
             GT = get_article_wrapper("news")
             headlines_out = GT[0]
-            return create_response(headlines_out)
+            return create_response_end(headlines_out)
         
         elif intentName == 'ReadGenreHeadlines':
             Genre = event["request"]["intent"]["slots"]["Gen"]["value"]
             GT = get_article_wrapper(Genre)
             headlines_out = GT[0]
-            return create_response(headlines_out)
+            return create_response_end(headlines_out)
         
         elif intentName == 'ReadSpecificArticle':
             num = event["request"]["intent"]["slots"]["Num"]["value"]
@@ -368,10 +414,10 @@ def lambda_handler(event, context):
             num = num_convert(num)
             if (num != -1):
                 content = GT[1][num]
-                return create_response(content)
+                return create_response_end(content)
             
             else:
-                return create_response('Invalid Request')
+                return create_response_end('Invalid Request')
 
         elif intentName == 'ReadSpecificArticleGenre':
             num = event["request"]["intent"]["slots"]["Num"]["value"]
@@ -382,11 +428,28 @@ def lambda_handler(event, context):
                 content = GT[1][num]
                 return create_response(content)
             else:
-                return create_response('Invalid Request')
+                return create_response_end('Invalid Request')
 
         elif intentName == 'EventsIntent':
             output = event_wrapper()
-            return create_response(output)
+            return create_response_end(output)
+
+        elif intentName == 'AMAZON.StopIntent':
+            return create_response_end('')
+
+        elif intentName == 'AMAZON.CancelIntent':
+            return create_response_end('Goodbye')
+        elif intentName == 'CacheIntent':
+            try:
+                temp = get_article('news')
+                temp = get_article('life entertainment')
+                temp = get_article('opinion')
+                temp = get_article('sports')
+                temp = get_events()
+                return create_response_end('Cash updated!')
+            except:
+                return create_response_end('Something went wrong!')
+
 
 
 #returning the response JASON structure
