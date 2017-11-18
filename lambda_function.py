@@ -318,7 +318,7 @@ def get_article(genre):
             temp_string = temp_string + article[0][j]
 
     # Start checking the content and headlines for blacklisted words
-    blacklist = [['news-editor.shorthorn@uta.edu', 'news-editor dot shorthorn at U.T.A dot E.D.U'], [' @', ' Author '], ['uta.edu', ' U.T.A dot e.d.u'], ['\xa0', ' '], ['UTA', ' U.T.A '], ['10-20-30', 'ten-twenty-thirty']]
+    blacklist = [['news-editor.shorthorn@uta.edu', 'news-editor dot shorthorn at U.T.A dot E.D.U'], [' @', ' Author '], ['uta.edu', ' U.T.A dot e.d.u'], ['\xa0', ' '], ['UTA', ' U.T.A '], ['10-20-30', 'ten-twenty-thirty'], ['&', ' and ']]
     #['\\',' ']
     m = 0
     for m in range(0, len(blacklist)):
