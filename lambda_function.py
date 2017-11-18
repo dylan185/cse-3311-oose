@@ -2,6 +2,7 @@ import urllib.request
 import os
 import datetime
 import re
+import json
 from bs4 import BeautifulSoup
 
 now = datetime.datetime.now()
@@ -26,24 +27,18 @@ def get_weather():
     # Set the strings for welcome message
     welcome = 'Welcome to U.T.A Short horn news! '
     weather_temperature = "Today, on campus it is "
-    weather_condition = ", and it is expected to be "
-    # Go to page
-    page = urllib.request.urlopen('https://www.accuweather.com/en/us/arlington-tx/76010/daily-weather-forecast/331134?day=1')
-    soup = BeautifulSoup(page, 'html.parser')
+    weather_condition = " degrees, and it is expected to be "
+    url = "http://api.wunderground.com/api/57d9e55c1fccce10/conditions/q/TX/Arlington.json"
+
+    request = urllib.request.Request(url)
+    response = json.load(urllib.request.urlopen(request))
     
-    # Get the weather for the day
-    current_temperature = soup.find('span', attrs={'class': 'large-temp'})
-    current_condition = soup.find('div', attrs={'class': 'cond'})
-    
-    # Strip to basic text
-    temperature = current_temperature.text.strip()
-    condition = current_condition.text.strip()
-    temperature = " ".join(temperature.split())
-    condition = " ".join(condition.split())
+    temperature = str(int(response["current_observation"]["temp_f"]))
+    condition = response["current_observation"]["weather"]
     
     weather = welcome + weather_temperature + temperature + weather_condition + condition + "."
     
-    #print(weather)
+    print(weather)
     
     return weather
 
