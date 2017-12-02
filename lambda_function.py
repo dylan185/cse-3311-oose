@@ -135,7 +135,7 @@ def event_wrapper():
             else:
                 continue
         except:
-            temp = ' . . happening right now'
+            temp = ' . . '
         if j != 0:
             event_string = event_string + '<break time="700ms"/>' + event_list[j][0] +  temp + ' in ' + event_list[j][2] + ' '
         else:
@@ -284,6 +284,7 @@ def get_article(genre):
     links = [a['href'] for a in top_articles.find_all('a', href=True) if a.text.strip()]
     
     # Deletes the comment links for each article (every odd position)
+
     del links[1::2]
     
     # Declare whitelist, i &lists
@@ -343,6 +344,7 @@ def get_article(genre):
 
     # Start checking the content and headlines for blacklisted words
     blacklist = [['news-editor.shorthorn@uta.edu', 'news-editor dot shorthorn at U.T.A dot E.D.U'], [' @', ' Author '], ['uta.edu', ' U.T.A dot e.d.u'], ['\xa0', ' '], ['UTA', ' U.T.A '], ['10-20-30', 'ten-twenty-thirty'], ['&', ' and ']]
+    #['\\',' ']
     m = 0
     for m in range(0, len(blacklist)):
         temp_string = re.sub(blacklist[m][0], blacklist[m][1], temp_string, flags=re.IGNORECASE)
