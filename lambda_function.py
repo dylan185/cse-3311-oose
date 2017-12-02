@@ -4,6 +4,7 @@ import datetime
 import re
 import json
 from bs4 import BeautifulSoup
+#import requests
 
 now = datetime.datetime.now()
 currentDate = str(now)[:10]
@@ -350,10 +351,11 @@ def get_article(genre):
 
 #sample = get_weather()
 #print(get_weather())
-print(event_wrapper())
+#print(event_wrapper())
 #print(get_article('news'))
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
+
 def create_response(input):
     output = '<speak>' + input + '</speak>'
     response_2 =    {
@@ -382,7 +384,14 @@ def create_response_end(input):
         }
     return response_2
 
-
+#def send_simple_message():
+#    return requests.post(
+#                         "https://api.mailgun.net/v3/sandbox6c7591fd3e574670896842fac8488867.mailgun.org/messages",
+#                         auth=("api", "key-ece2ec7b513d45ad2390241c1289787d"),
+#                         data={"from": "Mailgun Sandbox <postmaster@sandbox6c7591fd3e574670896842fac8488867.mailgun.org>",
+#                         "to": "Kashif Iqbal <kashif.iqbal@mavs.uta.edu>",
+#                         "subject": "Hello Kashif Iqbal",
+#                         "text": "Congratulations Kashif Iqbal, you just sent an email with Mailgun!  You are truly awesome!"})
 
 def lambda_handler(event, context):
     # This is to check to make sure our app is the only skill that can access this lambda function
@@ -450,6 +459,7 @@ def lambda_handler(event, context):
                 temp = get_article('opinion')
                 temp = get_article('sports')
                 temp = get_events()
+#                send_simple_message()
                 return create_response_end('Cash updated!')
             except:
                 return create_response_end('Something went wrong!')
