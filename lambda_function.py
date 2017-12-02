@@ -26,19 +26,40 @@ def get_page(the_string):
 def get_weather():
     # Set the strings for welcome message
     welcome = 'Welcome to U.T.A Short horn news! '
-    weather_temperature = "Today, on campus it is "
-    weather_condition = " degrees, and "
+    weather_current_temp = "Currently, on campus, it is "
+    weather_current_cond = " degrees, and "
+    weather_pred = " ,today you can expect it to be "
+    weather_high = " with a high of "
+    weather_low = " degrees, and a low of "
+
+    # Forecast url
+    url = "http://api.wunderground.com/api/57d9e55c1fccce10/forecast/q/TX/Arlington.json"
+
+    request = urllib.request.Request(url)
+    response = urllib.request.urlopen(request)
+    str_response = response.read().decode('utf-8')
+    body = json.loads(str_response)
+    
+    # Extract all the info from the messed up list
+    forecast = body["forecast"]["simpleforecast"]["forecastday"]
+    forecast = forecast[0]
+    pred_temperature_h = forecast["high"]["fahrenheit"]
+    pred_temperature_l = forecast["low"]["fahrenheit"]
+    pred_condition = forecast["conditions"]
+    
+    # conditions url
     url = "http://api.wunderground.com/api/57d9e55c1fccce10/conditions/q/TX/Arlington.json"
 
     request = urllib.request.Request(url)
-    response = json.load(urllib.request.urlopen(request))
-    
-    temperature = str(int(response["current_observation"]["temp_f"]))
-    condition = response["current_observation"]["weather"]
-    
-    weather = welcome + weather_temperature + temperature + weather_condition + condition + "."
-    
-    print(weather)
+    response = urllib.request.urlopen(request)
+    str_response = response.read().decode('utf-8')
+    body = json.loads(str_response)
+
+    # Exract from the list
+    current_temp = str(int(body["current_observation"]["temp_f"]))
+    current_condition = body["current_observation"]["weather"]
+
+    weather = welcome + weather_current_temp + current_temp + weather_current_cond + current_condition + weather_pred + pred_condition + weather_high + pred_temperature_h + weather_low + pred_temperature_l + " degrees."
     
     return weather
 
@@ -346,9 +367,9 @@ def get_article(genre):
     file.close()
     return final_article
 
-#sample = get_weather()
+sample = get_weather()
 #print(get_weather())
-print(event_wrapper())
+#print(event_wrapper())
 #print(get_article('news'))
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
