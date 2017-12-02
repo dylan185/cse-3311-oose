@@ -27,7 +27,7 @@ def get_weather():
     # Set the strings for welcome message
     welcome = 'Welcome to U.T.A Short horn news! '
     weather_temperature = "Today, on campus it is "
-    weather_condition = " degrees, and it is expected to be "
+    weather_condition = " degrees, and "
     url = "http://api.wunderground.com/api/57d9e55c1fccce10/conditions/q/TX/Arlington.json"
 
     request = urllib.request.Request(url)
@@ -350,7 +350,7 @@ def get_article(genre):
 
 #sample = get_weather()
 #print(get_weather())
-#print(event_wrapper())
+print(event_wrapper())
 #print(get_article('news'))
 
 #This is the lambda function, the event parameter is the Jason request from which we will extract the intents.
