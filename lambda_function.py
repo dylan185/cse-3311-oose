@@ -114,7 +114,7 @@ def event_wrapper():
             else:
                 continue
         except:
-            temp = ' . . happening right now'
+            temp = ' . . '
         if j != 0:
             event_string = event_string + '<break time="700ms"/>' + event_list[j][0] +  temp + ' in ' + event_list[j][2] + ' '
         else:
