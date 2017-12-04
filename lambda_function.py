@@ -6,7 +6,7 @@ import json
 from bs4 import BeautifulSoup
 #import requests
 
-now = datetime.datetime.now()
+now = datetime.datetime.now() - datetime.timedelta(hours=6)
 currentDate = str(now)[:10]
 currentHour = now.hour
 
@@ -28,7 +28,7 @@ def get_weather():
     # Set the strings for welcome message
     welcome = 'Welcome to U.T.A Short horn news! '
     weather_current_temp = "Currently, on campus, it is "
-    weather_current_cond = " degrees, and "
+    weather_current_cond = " degrees"
     weather_pred = " ,today you can expect it to be "
     weather_high = " with a high of "
     weather_low = " degrees, and a low of "
@@ -58,9 +58,9 @@ def get_weather():
 
     # Exract from the list
     current_temp = str(int(body["current_observation"]["temp_f"]))
-    current_condition = body["current_observation"]["weather"]
+#    current_condition = body["current_observation"]["weather"]
 
-    weather = welcome + weather_current_temp + current_temp + weather_current_cond + current_condition + weather_pred + pred_condition + weather_high + pred_temperature_h + weather_low + pred_temperature_l + " degrees."
+    weather = welcome + weather_current_temp + current_temp + weather_current_cond + weather_pred + pred_condition + weather_high + pred_temperature_h + weather_low + pred_temperature_l + " degrees."
     
     return weather
 
@@ -111,6 +111,12 @@ def event_wrapper():
     #event_list = get_events()
     # Convert the list into a string
     event_string = 'The current events today are <break time="700ms"/>'
+    newlist = []
+    for event in event_list:
+        if event not in newlist:
+            newlist.append(event)
+    event_list = newlist
+
     for j in range(0, len(event_list)):
         temp = event_list[j][1]
         #print(event_list[j][1])
@@ -370,7 +376,7 @@ def get_article(genre):
     file.close()
     return final_article
 
-sample = get_weather()
+#sample = get_weather()
 #print(get_weather())
 #print(event_wrapper())
 #print(get_article('news'))
