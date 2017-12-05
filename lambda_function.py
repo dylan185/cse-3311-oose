@@ -101,6 +101,7 @@ def event_wrapper():
         eventDate = data[0][:10]
         for i in range(1, len(data)):
             event_list.append(data[i].split("@!"))
+        print("Used Cached Events")
     except:
         event_list = get_events()
     finally:
@@ -111,6 +112,10 @@ def event_wrapper():
     #event_list = get_events()
     # Convert the list into a string
     event_string = 'The current events today are <break time="700ms"/>'
+    if len(event_list) == 0:
+        event_string = 'There are no event on campus today! <break time="700ms"/>'
+        return event_string
+
     newlist = []
     for event in event_list:
         if event not in newlist:
@@ -252,6 +257,7 @@ def get_article_wrapper(genre1):
             contents.append(data[i])
         temp_string = data[1]
         final_article = [temp_string, contents]
+        print("Used Cached Articles")
 
     except:
         final_article = get_article(genre)
@@ -486,7 +492,7 @@ def lambda_handler(event, context):
                 temp = get_article('opinion')
                 temp = get_article('sports')
                 temp = get_events()
-#                send_simple_message()
+                print("Cache Updated")
                 return create_response_end('Cash updated!')
             except:
                 return create_response_end('Something went wrong!')
